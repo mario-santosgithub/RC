@@ -14,7 +14,7 @@
 #include <dirent.h>
 #include <stdbool.h>
 
-#define NO_LOGIN "You are not logged in. Please try again!"
+#define ERR_MSG "ERR\n"
 
 
 #define SIZE 512
@@ -26,7 +26,6 @@ int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* p
 /* Main functions */
 bool checkArguments(char* ip_address, char* port, int argc, char** argv);
 
-/* UDP Client functions */
-void test(char* uid, struct addrinfo *res, int fd);
+
 
 #endif
