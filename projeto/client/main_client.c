@@ -6,12 +6,20 @@
 
 int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port){
     int sockfd = socket(AF_INET,socktype,0);
-    if (sockfd == -1){ exit(1); } // eror
+    if (sockfd == -1){ 
+        exit(1); 
+        printf(ERR_MSG);    
+    } 
+
     struct addrinfo hints;
     bzero(&hints, sizeof hints);
     hints.ai_family = AF_INET;
     hints.ai_socktype = socktype;
-    if(getaddrinfo(ip_address, port, &hints, res) != 0) { exit(1); } // eror
+    
+    if(getaddrinfo(ip_address, port, &hints, res) != 0) { 
+        exit(1); 
+        printf(ERR_MSG);    
+    }
     return sockfd;
 }
 
@@ -26,9 +34,20 @@ bool checkArguments(char* ip_address, char* port, int argc, char** argv){
 int main(int argc, char** argv) {
 
     char command[SIZE], plid[7], gid[3], ip_address[SIZE], port[6];
+    char firstFlag[3], secondFlag[3];
+    strcpy(firstFlag, argv[1]);
 
-    strcpy(ip_address, argv[1]); 
-    strcpy(port, argv[2]);
+    if (strcmp(firstFlag, "-n") == 0) {
+        strcpy(ip_address, argv[2]); 
+        strcpy(port, argv[4]);
+    }
+    else {
+        strcpy(ip_address, argv[4]); 
+        strcpy(port, argv[2]);
+    } 
+
+    printf("%s\n",ip_address);
+    printf("%s\n", port);
     /* fazer qualquer coisa para verificar os argumentos e dar msgs de erro */
     if (!checkArguments(ip_address, port, argc, argv));
 
