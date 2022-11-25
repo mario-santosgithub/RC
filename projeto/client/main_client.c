@@ -29,7 +29,7 @@ bool checkArguments(char* ip_address, char* port, int argc, char** argv){
     return true;
 }
 
-
+// errr
 
 int main(int argc, char** argv) {
 
