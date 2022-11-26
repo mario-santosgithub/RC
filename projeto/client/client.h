@@ -20,11 +20,16 @@
 #define SIZE 512
 #define BUFFER_SIZE 128
 
-int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port);
+/* UDP functions */
+int kappa(int fd, struct addrinfo *res, char* message, char* buffer, int size);
+void start(int fd, char* plid, struct addrinfo *res);
 
 
 /* Main functions */
+int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port);
 bool checkArguments(char* ip_address, char* port, int argc, char** argv);
+bool checkFlags(int argc, char** argv);
+void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* port, char* command, char* plid, char* groupId);
 
 
 

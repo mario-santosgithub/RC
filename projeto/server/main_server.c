@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
         FD_SET(udpSocket, &rset);
 
         if (FD_ISSET(udpSocket, &rset)) {
+            printf("alguem ligou\n");
             udpReceive(udpSocket, message);
         }
     }

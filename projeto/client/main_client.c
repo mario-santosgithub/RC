@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 
 
-int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port){
+int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port) {
     int sockfd = socket(AF_INET,socktype,0);
     if (sockfd == -1){ 
         exit(1); 
@@ -54,9 +54,78 @@ bool checkFlags(int argc, char** argv) {
 }
 
 
+void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* port, char* command, char* plid, char* groupId) {
+
+    char name[11]; // para o comando scoreboard, de 10 chars + '\0'
+    bzero(name, 11);
+    sscanf(command, "%s ", name);
+
+    command += strlen(name);
+    if (strcmp(name, "start") == 0 || strcmp(name, "sg") == 0 )  {
+        printf("start\n");
+        sscanf(command, "%s", plid);
+
+        if (strlen(plid) == 6) {
+            while (*plid) {
+                if (*plid < '0' || *plid > '9') { 
+                    printf(ERR_MSG);
+                    return;    
+                }
+                ++plid;
+            }
+            plid = plid - 6;
+            start(udp_socket, plid, res);
+        }
+        else {
+            printf(ERR_MSG);
+            return;
+        }
+    }
+
+    else if (strcmp(name, "play") == 0 || strcmp(name, "pl") == 0 )  {
+        
+    }
+
+    else if (strcmp(name, "guess") == 0 || strcmp(name, "gw") == 0 )  {
+        
+    }
+
+    else if (strcmp(name, "scoreboard") == 0 || strcmp(name, "sb") == 0 )  {
+        
+    }
+
+    else if (strcmp(name, "hint") == 0 || strcmp(name, "h") == 0 )  {
+        
+    }
+
+    else if (strcmp(name, "state") == 0 || strcmp(name, "st") == 0 )  {
+       
+    }
+
+    else if (strcmp(name, "quit") == 0 )  {
+        
+    }
+
+    else if (strcmp(name, "exit") == 0 )  {
+        close(udp_socket);
+        freeaddrinfo(res);
+        exit(EXIT_SUCCESS);
+        return;
+    }
+    
+    else {
+        printf(ERR_MSG);
+        return;
+    }
+    
+}
+
+
+
+
 int main(int argc, char** argv) {
 
-    char command[SIZE], plid[7], gid[3], ip_address[SIZE], port[6];
+    char command[SIZE], plid[7], groupId[3], ip_address[SIZE], port[6];
     char firstFlag[3], secondFlag[3];
 
 
@@ -77,8 +146,8 @@ int main(int argc, char** argv) {
         strcpy(port, argv[2]);
     } 
 
-    printf("%s\n",ip_address);
-    printf("%s\n", port);
+    printf("ip: %s\n",ip_address);
+    printf("port: %s\n", port);
     /* fazer qualquer coisa para verificar os argumentos e dar msgs de erro */
     if (!checkArguments(ip_address, port, argc, argv)) {
         printf(ERR_MSG);
@@ -95,11 +164,8 @@ int main(int argc, char** argv) {
     // Read commands
     while(fgets(command, SIZE, stdin)) {
         
-        char name[12];
-        if(sscanf(command, "%s ", name) < 1) {
-            printf("errado\n");
-            return 0;
-        }
+        commandExe(udp_socket, res, ip_address, port, command, plid, groupId);
+        printf(" _______________________________ \n");
     }
 
     close(udp_socket);
