@@ -62,7 +62,6 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
 
     command += strlen(name);
     if (strcmp(name, "start") == 0 || strcmp(name, "sg") == 0 )  {
-        printf("start\n");
         sscanf(command, "%s", plid);
 
         if (strlen(plid) == 6) {
@@ -121,6 +120,30 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
 }
 
 
+void displayGame(char* buffer) {
+    // max buffer size is 128
+    char val[BUFFER_SIZE], arg1[31];
+    char output[BUFFER_SIZE];
+    int n;
+
+    sscanf(buffer, "%s %s", val, arg1);
+
+    if (strcmp(val, "RSG") == 0 && strcmp(arg1, "OK") == 0) {
+        buffer += strlen(val) + strlen(arg1) + 2;
+        sscanf(buffer, "%s %s", val, arg1); // number of leters
+        
+        n = atoi(val);
+        sprintf(output, "New game started (max %s errors):", arg1);
+
+        for (int i=0; i<n; i++) {
+            strcat(output, " _");
+        }
+    }
+
+    puts(output);
+
+}
+
 
 
 int main(int argc, char** argv) {
@@ -146,8 +169,7 @@ int main(int argc, char** argv) {
         strcpy(port, argv[2]);
     } 
 
-    printf("ip: %s\n",ip_address);
-    printf("port: %s\n", port);
+    
     /* fazer qualquer coisa para verificar os argumentos e dar msgs de erro */
     if (!checkArguments(ip_address, port, argc, argv)) {
         printf(ERR_MSG);
@@ -165,7 +187,6 @@ int main(int argc, char** argv) {
     while(fgets(command, SIZE, stdin)) {
         
         commandExe(udp_socket, res, ip_address, port, command, plid, groupId);
-        printf(" _______________________________ \n");
     }
 
     close(udp_socket);

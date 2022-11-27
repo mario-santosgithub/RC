@@ -21,7 +21,7 @@
 #define BUFFER_SIZE 128
 
 /* UDP functions */
-int kappa(int fd, struct addrinfo *res, char* message, char* buffer, int size);
+int udpTransmission(int fd, struct addrinfo *res, char* message, char* buffer, int size);
 void start(int fd, char* plid, struct addrinfo *res);
 
 
@@ -29,6 +29,7 @@ void start(int fd, char* plid, struct addrinfo *res);
 int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port);
 bool checkArguments(char* ip_address, char* port, int argc, char** argv);
 bool checkFlags(int argc, char** argv);
+void displayGame(char* buffer);
 void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* port, char* command, char* plid, char* groupId);
 
 
