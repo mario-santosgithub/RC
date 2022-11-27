@@ -23,6 +23,7 @@
 /* UDP functions */
 int udpTransmission(int fd, struct addrinfo *res, char* message, char* buffer, int size);
 void start(int fd, char* plid, struct addrinfo *res);
+void play(int fd, char* plid, char* letter, int turn, struct addrinfo *res);
 
 
 /* Main functions */

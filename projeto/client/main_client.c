@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+int turn;
 
 int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port) {
     int sockfd = socket(AF_INET,socktype,0);
@@ -82,6 +83,28 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
     }
 
     else if (strcmp(name, "play") == 0 || strcmp(name, "pl") == 0 )  {
+        printf("here\n");
+        char letter[2]; 
+        sscanf(command, "%s", letter);
+        printf("%s\n", letter);
+
+        if (strlen(letter) == 1) {
+            if (*letter < 'A' || ('Z' < *letter && *letter < 'a') || 'z' < *letter) { 
+                
+                printf(ERR_MSG);
+                return;    
+            }
+
+            if (*letter >= 'a' && *letter <= 'z') {
+                *letter -= 32;
+            }
+            
+            play(udp_socket, plid, letter, turn, res);
+        }
+        else {
+            printf(ERR_MSG);
+            return;
+        }
         
     }
 
@@ -116,7 +139,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         printf(ERR_MSG);
         return;
     }
-    
+    bzero(command, 512);
 }
 
 
@@ -139,6 +162,30 @@ void displayGame(char* buffer) {
             strcat(output, " _");
         }
     }
+    else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "OK") == 0) {
+        int turnCheck, n, m;
+
+        char temp[2];
+
+        buffer += strlen(val) + strlen(arg1) + 2;
+        sscanf(buffer, "%s %s", temp, val);
+        turnCheck = atoi(temp);
+        n = atoi(val);
+        buffer += strlen(val) + strlen(arg1) + 2;
+        
+        int positions[n];
+
+        for (int i=0; i< n; i++) {
+            sscanf(buffer, "%s", val);
+            buffer += strlen(val);
+
+            m = atoi(val);
+
+            positions[i] = m;
+        }
+        // FICÁMOS AQUI |||||||||||||||||||||||
+        
+    }
 
     puts(output);
 
@@ -150,7 +197,7 @@ int main(int argc, char** argv) {
 
     char command[SIZE], plid[7], groupId[3], ip_address[SIZE], port[6];
     char firstFlag[3], secondFlag[3];
-
+    turn = 1;
 
     if (argc != 5 || !checkFlags(argc, argv)) {
         printf(ERR_MSG);
