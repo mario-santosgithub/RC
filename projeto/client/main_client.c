@@ -100,7 +100,8 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
                 *letter -= 32;
             }
             
-            play(udp_socket, plid, letter, turn, res);
+            if(play(udp_socket, plid, letter, turn, res) != -1) { turn++; }
+            
         }
         else {
             printf(ERR_MSG);
@@ -207,12 +208,36 @@ void displayGame(char* buffer, char* letter) {
             word[m-1] = *letter;
         }
 
-        // FICÁMOS AQUI |||||||||||||||||||||||
+        
         sprintf(output, "Yes, \"%s\" is part of the word: ", letter);
         strcat(output, word);
 
-
     }
+
+    else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "NOK") == 0) {
+        
+        int turnCheck, n, m;
+        char output[BUFFER_SIZE];
+
+        char temp[2];
+        buffer += strlen(val) + strlen(arg1) + 2;
+        
+        sprintf(output, "No, \"%s\" is not part of the word: ", letter);
+        strcat(output, word);
+        
+    }
+
+    else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "WIN") == 0) {
+
+        for (int i=0; i<k; i++) {
+            if (word[i] == '_') {
+                word[i] = *letter;
+            }
+        }
+
+        sprintf(output, "WELL DONE! You guessed: %s", word);
+    }
+    else {puts(ERR_MSG);}
     puts(output);
 
 }

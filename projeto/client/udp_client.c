@@ -42,23 +42,25 @@ void start(int fd, char* plid, struct addrinfo *res) {
     return;
 }
 
-void play(int fd, char* plid, char* letter, int turn, struct addrinfo *res) {
+int play(int fd, char* plid, char* letter, int turn, struct addrinfo *res) {
     
     char message[20], buffer[BUF_SIZE];
 
     sprintf(message, "PLG %s %s %d\n", plid, letter, turn);
-    //sprintf(message, "KILLGAME 099275\n");
 
 
 
 
     if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ){
         printf(ERR_MSG);
-        return;
+        return -1;
     };
 
 
     displayGame(buffer, letter);
+
+
+    return 1;
 }
 
 void kill(int fd, char* plid, struct addrinfo *res) {
