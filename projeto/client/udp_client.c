@@ -38,7 +38,7 @@ void start(int fd, char* plid, struct addrinfo *res) {
         return;
     };
 
-    displayGame(buffer);
+    displayGame(buffer, NULL);
     return;
 }
 
@@ -49,7 +49,7 @@ void play(int fd, char* plid, char* letter, int turn, struct addrinfo *res) {
     sprintf(message, "PLG %s %s %d\n", plid, letter, turn);
     //sprintf(message, "KILLGAME 099275\n");
 
-    printf("sent: %s\n", message);
+
 
 
     if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ){
@@ -57,8 +57,8 @@ void play(int fd, char* plid, char* letter, int turn, struct addrinfo *res) {
         return;
     };
 
-    printf("buffer: %s\n", buffer);
-    displayGame(buffer);
+
+    displayGame(buffer, letter);
 }
 
 void kill(int fd, char* plid, struct addrinfo *res) {
@@ -72,7 +72,5 @@ void kill(int fd, char* plid, struct addrinfo *res) {
         printf(ERR_MSG);
         return;
     };
-
-    displayGame(buffer);
     return;
 }

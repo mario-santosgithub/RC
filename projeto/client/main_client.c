@@ -4,6 +4,8 @@
 #include <sys/socket.h>
 
 int turn;
+char word[MAX_WORD_LEN];
+int k;
 
 int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port) {
     int sockfd = socket(AF_INET,socktype,0);
@@ -83,10 +85,9 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
     }
 
     else if (strcmp(name, "play") == 0 || strcmp(name, "pl") == 0 )  {
-        printf("here\n");
+        
         char letter[2]; 
         sscanf(command, "%s", letter);
-        printf("%s\n", letter);
 
         if (strlen(letter) == 1) {
             if (*letter < 'A' || ('Z' < *letter && *letter < 'a') || 'z' < *letter) { 
@@ -147,7 +148,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
                 ++plid;
             }
             plid = plid - 6;
-            printf("aqui");
+            
             kill(udp_socket, plid, res);
         }
         else {
@@ -164,7 +165,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
 }
 
 
-void displayGame(char* buffer) {
+void displayGame(char* buffer, char* letter) {
     // max buffer size is 128
     char val[BUFFER_SIZE], arg1[31];
     char output[BUFFER_SIZE];
@@ -178,36 +179,40 @@ void displayGame(char* buffer) {
         
         n = atoi(val);
         sprintf(output, "New game started (max %s errors):", arg1);
-
+        k = n;
         for (int i=0; i<n; i++) {
             strcat(output, " _");
+            word[i] = '_';
         }
+
     }
     else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "OK") == 0) {
         int turnCheck, n, m;
+        char output[BUFFER_SIZE];
 
         char temp[2];
-
         buffer += strlen(val) + strlen(arg1) + 2;
+     
         sscanf(buffer, "%s %s", temp, val);
         turnCheck = atoi(temp);
         n = atoi(val);
-        buffer += strlen(val) + strlen(arg1) + 2;
+        buffer += strlen(temp) + strlen(val) + 2;
         
-        int positions[n];
 
         for (int i=0; i< n; i++) {
             sscanf(buffer, "%s", val);
-            buffer += strlen(val);
+            buffer += strlen(val) + 1;
 
             m = atoi(val);
-
-            positions[i] = m;
+            word[m-1] = *letter;
         }
-        // FICÁMOS AQUI |||||||||||||||||||||||
-        
-    }
 
+        // FICÁMOS AQUI |||||||||||||||||||||||
+        sprintf(output, "Yes, \"%s\" is part of the word: ", letter);
+        strcat(output, word);
+
+
+    }
     puts(output);
 
 }

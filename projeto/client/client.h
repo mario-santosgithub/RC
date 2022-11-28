@@ -16,7 +16,7 @@
 
 #define ERR_MSG "ERR\n"
 
-
+#define MAX_WORD_LEN 50
 #define SIZE 512
 #define BUFFER_SIZE 128
 
@@ -31,7 +31,7 @@ void kill(int fd, char* plid, struct addrinfo *res);
 int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port);
 bool checkArguments(char* ip_address, char* port, int argc, char** argv);
 bool checkFlags(int argc, char** argv);
-void displayGame(char* buffer);
+void displayGame(char* buffer, char* letter);
 void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* port, char* command, char* plid, char* groupId);
 
 
