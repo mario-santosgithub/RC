@@ -134,6 +134,27 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         exit(EXIT_SUCCESS);
         return;
     }
+
+    else if (strcmp(name, "kill") == 0 || strcmp(name, "k") == 0 )  {
+        sscanf(command, "%s", plid);
+
+        if (strlen(plid) == 6) {
+            while (*plid) {
+                if (*plid < '0' || *plid > '9') { 
+                    printf(ERR_MSG);
+                    return;    
+                }
+                ++plid;
+            }
+            plid = plid - 6;
+            printf("aqui");
+            kill(udp_socket, plid, res);
+        }
+        else {
+            printf(ERR_MSG);
+            return;
+        }
+    }
     
     else {
         printf(ERR_MSG);

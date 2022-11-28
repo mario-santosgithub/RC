@@ -60,3 +60,19 @@ void play(int fd, char* plid, char* letter, int turn, struct addrinfo *res) {
     printf("buffer: %s\n", buffer);
     displayGame(buffer);
 }
+
+void kill(int fd, char* plid, struct addrinfo *res) {
+
+    char message[20], buffer[BUF_SIZE];
+
+    sprintf(message, "KILLGAME %s\n", plid);
+    
+    
+    if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ){
+        printf(ERR_MSG);
+        return;
+    };
+
+    displayGame(buffer);
+    return;
+}
