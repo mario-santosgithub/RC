@@ -57,6 +57,7 @@ int play(int fd, char* plid, char* letter, int turn, struct addrinfo *res) {
     };
 
 
+
     displayGame(buffer, letter);
 
 

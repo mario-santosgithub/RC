@@ -178,8 +178,12 @@ void displayGame(char* buffer, char* letter) {
         buffer += strlen(val) + strlen(arg1) + 2;
         sscanf(buffer, "%s %s", val, arg1); // number of leters
         
+        for (int i=0; i<MAX_WORD_LEN; i++) {
+            word[i] = ' ';
+        }
+        turn = 1;
         n = atoi(val);
-        sprintf(output, "New game started (max %s errors):", arg1);
+        sprintf(output, "New game started (max %s errors): ", arg1);
         k = n;
         for (int i=0; i<n; i++) {
             strcat(output, "_");
@@ -189,7 +193,6 @@ void displayGame(char* buffer, char* letter) {
     }
     else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "OK") == 0) {
         int turnCheck, n, m;
-        char output[BUFFER_SIZE];
 
         char temp[2];
         buffer += strlen(val) + strlen(arg1) + 2;
@@ -217,7 +220,6 @@ void displayGame(char* buffer, char* letter) {
     else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "NOK") == 0) {
         
         int turnCheck, n, m;
-        char output[BUFFER_SIZE];
 
         char temp[2];
         buffer += strlen(val) + strlen(arg1) + 2;
@@ -225,6 +227,12 @@ void displayGame(char* buffer, char* letter) {
         sprintf(output, "No, \"%s\" is not part of the word: ", letter);
         strcat(output, word);
         
+    }
+
+    else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "DUP") == 0) {
+        sprintf(output, "You have already played the letter \"%s\"!: ", letter);
+        strcat(output, word);
+        turn -= 1;
     }
 
     else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "WIN") == 0) {
