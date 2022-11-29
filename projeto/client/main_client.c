@@ -182,7 +182,7 @@ void displayGame(char* buffer, char* letter) {
         sprintf(output, "New game started (max %s errors):", arg1);
         k = n;
         for (int i=0; i<n; i++) {
-            strcat(output, " _");
+            strcat(output, "_");
             word[i] = '_';
         }
 
