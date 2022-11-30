@@ -58,11 +58,11 @@ bool checkFlags(int argc, char** argv) {
 
 
 void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* port, char* command, char* plid, char* groupId) {
-
+    printf("t: %d\n", turn);
     char name[11]; // para o comando scoreboard, de 10 chars + '\0'
     bzero(name, 11);
     sscanf(command, "%s ", name);
-
+    
     command += strlen(name);
     if (strcmp(name, "start") == 0 || strcmp(name, "sg") == 0 )  {
         sscanf(command, "%s", plid);
@@ -112,6 +112,24 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
 
     else if (strcmp(name, "guess") == 0 || strcmp(name, "gw") == 0 )  {
         
+        char guessWord[MAX_WORD_LEN];
+        sscanf(command, "%s", guessWord);
+
+        int size = strlen(guessWord);
+
+        for (int i=0; i<size; i++) {
+            if (guessWord[i] <'A' || ('Z' < guessWord[i] && guessWord[i] <'a') || 'z' < guessWord[i]) {
+                printf(ERR_MSG);
+                return;
+            }
+
+            if (guessWord[i] >= 'a' && guessWord[i] <= 'z') {
+                guessWord[i] -= 32;
+            }
+        }
+
+        guess(udp_socket, plid, guessWord, turn, res);
+
     }
 
     else if (strcmp(name, "scoreboard") == 0 || strcmp(name, "sb") == 0 )  {
@@ -171,11 +189,12 @@ void displayGame(char* buffer, char* letter) {
     char val[BUFFER_SIZE], arg1[31];
     char output[BUFFER_SIZE];
     int n;
-
+    
     sscanf(buffer, "%s %s", val, arg1);
-
+    buffer += strlen(val) + strlen(arg1) + 2;
+    
     if (strcmp(val, "RSG") == 0 && strcmp(arg1, "OK") == 0) {
-        buffer += strlen(val) + strlen(arg1) + 2;
+        
         sscanf(buffer, "%s %s", val, arg1); // number of leters
         
         for (int i=0; i<MAX_WORD_LEN; i++) {
@@ -191,11 +210,16 @@ void displayGame(char* buffer, char* letter) {
         }
 
     }
+
+    else if (strcmp(val, "RSG") == 0 && strcmp(arg1, "NOK") == 0) {
+        sprintf(output, "This player has already started a game!");
+
+    }
     else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "OK") == 0) {
         int turnCheck, n, m;
 
         char temp[2];
-        buffer += strlen(val) + strlen(arg1) + 2;
+       
      
         sscanf(buffer, "%s %s", temp, val);
         turnCheck = atoi(temp);
@@ -222,7 +246,7 @@ void displayGame(char* buffer, char* letter) {
         int turnCheck, n, m;
 
         char temp[2];
-        buffer += strlen(val) + strlen(arg1) + 2;
+        
         
         sprintf(output, "No, \"%s\" is not part of the word: ", letter);
         strcat(output, word);
@@ -235,15 +259,26 @@ void displayGame(char* buffer, char* letter) {
         turn -= 1;
     }
 
-    else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "WIN") == 0) {
+    else if ((strcmp(val, "RLG") == 0 && strcmp(arg1, "WIN") == 0) ||
+        (strcmp(val, "RWG") == 0 && strcmp(arg1, "WIN") == 0)) {
 
-        for (int i=0; i<k; i++) {
-            if (word[i] == '_') {
-                word[i] = *letter;
+        if (strcmp(val, "RLG") == 0) {
+            for (int i=0; i<k; i++) {
+                if (word[i] == '_') {
+                    word[i] = *letter;
+                }
             }
+            sprintf(output, "WELL DONE! You guessed: %s", word);
         }
+        else {
+            sprintf(output, "WELL DONE! You guessed: %s", letter);
+        }
+    }
+    
+    else if (strcmp(val, "RWG")== 0 && strcmp(arg1, "NOK") == 0) {
 
-        sprintf(output, "WELL DONE! You guessed: %s", word);
+        sprintf(output, "That as not the correct word!");
+        
     }
     else {puts(ERR_MSG);}
     puts(output);

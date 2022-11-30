@@ -24,6 +24,7 @@
 int udpTransmission(int fd, struct addrinfo *res, char* message, char* buffer, int size);
 void start(int fd, char* plid, struct addrinfo *res);
 int play(int fd, char* plid, char* letter, int turn, struct addrinfo *res);
+void guess(int fd, char* plid, char* word, int turn, struct addrinfo *res);
 void kill(int fd, char* plid, struct addrinfo *res);
 
 
