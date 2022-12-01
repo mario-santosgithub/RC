@@ -20,6 +20,7 @@
 #define SIZE 512
 #define BUFFER_SIZE 128
 
+
 /* UDP functions */
 int udpTransmission(int fd, struct addrinfo *res, char* message, char* buffer, int size);
 void start(int fd, char* plid, struct addrinfo *res);
@@ -27,6 +28,8 @@ int play(int fd, char* plid, char* letter, int turn, struct addrinfo *res);
 void guess(int fd, char* plid, char* word, int turn, struct addrinfo *res);
 void kill(int fd, char* plid, struct addrinfo *res);
 
+/* TCP functions */
+void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res);
 
 /* Main functions */
 int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port);

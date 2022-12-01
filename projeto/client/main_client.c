@@ -133,7 +133,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
     }
 
     else if (strcmp(name, "scoreboard") == 0 || strcmp(name, "sb") == 0 )  {
-        
+        scoreboard(ip_address, port, plid, res);
     }
 
     else if (strcmp(name, "hint") == 0 || strcmp(name, "h") == 0 )  {
@@ -316,6 +316,12 @@ int main(int argc, char** argv) {
         printf(ERR_MSG);
         printf("Formatação errada, exemplo de utilização correta: './player -n lima -p 58000'\n");
         return 0;
+    }
+
+    // create a directory to store the files recieved from TCP
+    if (mkdir("FILES", 700) == -1 && access("FILES", F_OK)) {
+        puts("Fail with the files directory");
+        exit(1);
     }
 
 
