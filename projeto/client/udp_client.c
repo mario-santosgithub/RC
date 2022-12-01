@@ -16,7 +16,7 @@ int udpTransmission(int fd, struct addrinfo *res, char* message, char* buffer, i
     
     while(true) {
         nbytes = recvfrom(fd, buffer, size, 0, (struct sockaddr*)&addr, &addrlen);
-        printf("b: %s\n", buffer);
+        
         if (nbytes == -1) {
             printf("Internal Server Error: Try again\n");
             return -1;
@@ -87,5 +87,20 @@ void guess(int fd, char* plid, char* word, int turn, struct addrinfo *res) {
     }
 
     displayGame(buffer, word);
+    return;
+}
+
+void quit(int fd, char* plid, struct addrinfo *res) {
+    char message[20], buffer[BUF_SIZE];
+
+    sprintf(message, "QUT %s\n", plid);
+    
+    
+    if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ){
+        printf(ERR_MSG);
+        return;
+    };
+
+    //displayGame(buffer, NULL);
     return;
 }

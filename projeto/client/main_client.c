@@ -145,10 +145,27 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
     }
 
     else if (strcmp(name, "quit") == 0 )  {
+        sscanf(command, "%s", plid);
+        if (strlen(plid) == 6) {
+            while (*plid) {
+                if (*plid < '0' || *plid > '9') { 
+                    printf(ERR_MSG);
+                    return;    
+                }
+                ++plid;
+            }
+            plid = plid - 6;
+            quit(udp_socket, plid, res);
+        }
+        else {
+            printf(ERR_MSG);
+            return;
+        }
         
     }
 
     else if (strcmp(name, "exit") == 0 )  {
+        quit(udp_socket, plid, res);
         close(udp_socket);
         freeaddrinfo(res);
         exit(EXIT_SUCCESS);
@@ -319,7 +336,7 @@ int main(int argc, char** argv) {
     }
 
     // create a directory to store the files recieved from TCP
-    if (mkdir("FILES", 700) == -1 && access("FILES", F_OK)) {
+    if (mkdir("FILES", 755) == -1 && access("FILES", F_OK)) {
         puts("Fail with the files directory");
         exit(1);
     }

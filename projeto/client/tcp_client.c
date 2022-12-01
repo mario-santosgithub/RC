@@ -54,9 +54,10 @@ int tcpRead(char* buffer, ssize_t size) {
 }
 
 
+
 void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) {
     
-    char message[5];
+    char message[5], aux[2];
     bzero(message, 5);
     sprintf(message, "GSB\n");
 
@@ -83,39 +84,100 @@ void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) 
     char endOfMsg[2];
     bzero(endOfMsg, 2);
 
-    if (strcmp(status, "Ok ") == 0) {
-        
-    }
-
-/*
-
-
-    
-    char end[2];
-    bzero(end, 2);
-
-    if (strcmp(status, "NOK") == 0) {
-        printf("here");
-        nread = tcpRead(end, 1);
-        if (nread == -1) return;
-        if (strcmp("\n", end) == 0) {
-            puts("fail");
-            return;
-        }
-        close(tcpSocket);
-        return;
-    }
+    if (strcmp(status, "OK ") == 0) {printf("ok\n");}
 
     if (strcmp(status, "OK ") == 0) {
-        printf("here");
-        char playerID[20];
-        bzero(playerID, 20);
+        char fileName[30];
+        bzero(fileName, 30);
+        int index = 0;
 
         while(true) {
-            nread = tcpRead(playerID, 1);
+            //printf("fleName: %s\n", fileName);
+            nread = tcpRead(fileName+index, 1);
             if (nread == -1) return;
 
+            if (fileName[index] == ' ') {
+                fileName[index] = '\0';
+                break;
+            }
+
+            if (index == 30) {
+                close(tcpSocket);
+                puts("Nome muito comprido?");
+                return;
+            }
+            index++;
+        }
+        char fileSize[4];
+        bzero(fileSize, 4);
+
+        nread = tcpRead(fileSize, 3);
+        if (nread == -1) return;
+
+
+        char filePath[40];
+        sprintf(filePath, "FILES/%s", fileName);
+        FILE* fp = fopen(filePath, "wb");
+
+        if (!fp) {
+            close(tcpSocket);
+            puts("Erro ao guardar o ficheiro");
+            return;
+        }
+
+
+        char score[5], playerID[8], word[MAX_WORD_LEN], suc[3], plays[3];
+        char line[128];
+        bzero(score, 5);
+        bzero(playerID, 7);
+        bzero(word, MAX_WORD_LEN);
+        bzero(suc, 3);
+        bzero(plays, 3);
+        
+        nread = tcpRead(aux, 1);
+        for (int k=0; k< 10; k++) {
+
+
+            nread = tcpRead(score, 4);
+            //printf("s: %s\n", score);
+
+            nread = tcpRead(playerID, 7);
+            //printf("s: %s\n", playerID);
+
+            int i=0, l=0;
+            while(true) {
+                nread = tcpRead(word+i, 1);
+                if (nread == -1) return;
+
+                if (word[i] == ' '&& l != 0) {
+                    word[i] = '\0';
+                    break;
+                }
+
+                if (word[i] != ' ') {
+                    l = 1;
+                }
+
+                if (i == 30) {
+                    break;
+                }
+                i++;
+            }
+
+            //printf("w: %s\n", word);    
+
+            nread = tcpRead(suc, 2);
+            //printf("s: %s\n", suc);
+
+            if (strlen(suc) == 1) {
+                nread = tcpRead(aux, 1);
+            }
+
+            nread = tcpRead(score, 2);
+            //printf("s: %s\n", score);
+            sprintf(line, "%d- player %swith %strials for %ld letter word",k+1,playerID,suc,strlen(word));
+            printf("%s\n", line);
+            nread = tcpRead(aux, 1);
         }
     }
-*/
 }
