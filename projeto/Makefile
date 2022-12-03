@@ -1,10 +1,12 @@
-all: player SV
+# Makefile - Projeto de Redes de Computadores - 2º Período 2021/22 - IST
 
-player: common.o client/main_client.o client/tcp_client.o client/udp_client.o
-			gcc -o player common.o client/main_client.o client/tcp_client.o client/udp_client.o
+all: player GS
 
-SV: server/main_server.o server/udp_server.o server/tcp_server.o
-		gcc -o SV common.o server/main_server.o server/udp_server.o server/tcp_server.o
+player: common.o Client/client_main.o Client/client_tcp.o Client/client_udp.o
+	gcc -o player common.o Client/client_main.o Client/client_tcp.o Client/client_udp.o
 
-clean: 
-		rm -rf *.o client/*.o server/*.o player SV FILES
+GS: Server/server_main.o Server/server_udp.o Server/server_tcp.o
+	gcc -o GS common.o Server/server_main.o Server/server_udp.o Server/server_tcp.o
+
+clean:
+	rm -rf Client/*.o Server/*.o *.o player GS FILES
