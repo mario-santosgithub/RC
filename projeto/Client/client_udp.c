@@ -81,6 +81,10 @@ void guess(int fd, char* plid, char* word, int turn, struct addrinfo *res) {
 
     sprintf(message, "PWG %s %s %d\n", plid, word, turn);
     printf("m: %s\n", message);
+    if (strlen(word) == 1) { 
+        puts("That is not a word!");
+        return;
+    }
     if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ) {
         printf(ERR_MSG);
         return;

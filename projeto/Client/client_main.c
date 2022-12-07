@@ -137,6 +137,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
             if (guessWord[i] >= 'a' && guessWord[i] <= 'z') {
                 guessWord[i] -= 32;
             }
+
         }
 
         guess(udp_socket, plid, guessWord, turn, res);
@@ -148,14 +149,11 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
     }
 
     else if (!strcmp(name, "hint") || !strcmp(name, "ul")){
-        // User list (TCP): (none)
-        // There must be a logged in user and a group selected
-        /*if (!(has_correct_arg_sizes(arg1, "first additional argument", 0, arg2, "second additional argument", 0) && check_login(uid, true) && check_group(gid)))
-            return;*/
+        
 
 
         
-        printf("here\n");
+
         hint(ip_address, port, plid, res);
     
     } 
@@ -310,7 +308,19 @@ void displayGame(char* buffer, char* letter) {
     
     else if (strcmp(val, "RWG")== 0 && strcmp(arg1, "NOK") == 0) {
 
-        sprintf(output, "That as not the correct word!");
+        sprintf(output, "That was not the correct word!");
+        turn += 1;
+    }
+
+    else if (strcmp(val, "RWG")== 0 && strcmp(arg1, "OVR") == 0) {
+
+        sprintf(output, "That was not the correct word! You have no more chances to guess.");
+        
+    }
+
+    else if (strcmp(val, "RWG")== 0 && strcmp(arg1, "INV") == 0) {
+
+        sprintf(output, "Problem with the turn count!");
         
     }
     else {puts(ERR_MSG);}

@@ -125,11 +125,6 @@ void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) 
             }
             index++;
         }
-        char fileSize[4];
-        bzero(fileSize, 4);
-
-        nread = tcpRead(fileSize, 3);
-        if (nread == -1) return;
 
 
         char filePath[40];
@@ -144,58 +139,33 @@ void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) 
 
 
         char score[5], playerID[8], word[MAX_WORD_LEN], suc[3], plays[3];
-        char line[128];
-        bzero(score, 5);
-        bzero(playerID, 7);
-        bzero(word, MAX_WORD_LEN);
-        bzero(suc, 3);
-        bzero(plays, 3);
-        
-        nread = tcpRead(aux, 1);
-        for (int k=0; k< 10; k++) {
+        char line[12800];
 
+        index = 0;
+        while(true) {
+            //printf("fleName: %s\n", fileName);
+            nread = tcpRead(line+index, 1);
+            if (nread == -1) return;
 
-            nread = tcpRead(score, 4);
-            //printf("s: %s\n", score);
-
-            nread = tcpRead(playerID, 7);
-            //printf("s: %s\n", playerID);
-
-            int i=0, l=0;
-            while(true) {
-                nread = tcpRead(word+i, 1);
-                if (nread == -1) return;
-
-                if (word[i] == ' '&& l != 0) {
-                    word[i] = '\0';
-                    break;
-                }
-
-                if (word[i] != ' ') {
-                    l = 1;
-                }
-
-                if (i == 30) {
-                    break;
-                }
-                i++;
+            if (line[index] == '\n') {
+                fprintf(fp, "%s",line);
             }
 
-            //printf("w: %s\n", word);    
-
-            nread = tcpRead(suc, 2);
-            //printf("s: %s\n", suc);
-
-            if (strlen(suc) == 1) {
-                nread = tcpRead(aux, 1);
+            if (line[index] == '\0') {
+                fprintf(fp, "%s",line);
+                break;
             }
 
-            nread = tcpRead(score, 2);
-            //printf("s: %s\n", score);
-            sprintf(line, "%d- player %swith %strials for %ld letter word: %s\n",k+1,playerID,suc,strlen(word), word);
-            printf("%s", line);
-            fprintf(fp, "%s",line);
+            if (index == 12800) {
+                close(tcpSocket);
+                puts("Nome muito comprido?");
+                return;
+            }
+            index++;
         }
+        
+        fprintf(fp, "%s",line);
+        
         fclose(fp);
     }
 }
@@ -210,19 +180,15 @@ void hint(char* ip_address, char* port, char* plid, struct addrinfo *res){
     if (tcpConnect(ip_address, port, &tcpSocket, res) == -1 || tcpSend(message, strlen(message)) == -1)
         return;
 
-    printf("liguei\n");
-
     char result[5];
     bzero(result, 5);
 
     ssize_t nread = tcpRead(result, 4);
-    printf("r: %s\n", result);
 
     char status[4];
     bzero(status, 4);
 
     nread = tcpRead(status, 3);
-    printf("r: %s\n", status);
 
     if (!strcmp(status, "OK ")) {
 
@@ -248,7 +214,6 @@ void hint(char* ip_address, char* port, char* plid, struct addrinfo *res){
             index++;
         }
 
-        printf("f: %s\n", fileName);
 
         char size[20];
         index = 0;
@@ -271,12 +236,9 @@ void hint(char* ip_address, char* port, char* plid, struct addrinfo *res){
             index++;
         }
         int sizeInt = atoi(size);
-        printf("%d\n", sizeInt);
 
         char data[sizeInt];
         nread = tcpRead(data, sizeInt);
-
-        printf("data: %s\n", data);
 
         char filePath[40];
         sprintf(filePath, "FILES/%s", fileName);
