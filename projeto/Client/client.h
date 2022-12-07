@@ -31,7 +31,7 @@ void kill(int fd, char* plid, struct addrinfo *res);
 
 /* TCP functions */
 void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res);
-void hint(char* ip_address, char* port, char* groupID, struct addrinfo *res);
+void hint(char* ip_address, char* port, char* plid, struct addrinfo *res);
 
 /* Main functions */
 int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port);

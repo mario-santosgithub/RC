@@ -201,16 +201,92 @@ void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) 
 }
 
 
-void hint(char* ip_address, char* port, char* groupID, struct addrinfo *res){
-    printf("entrei\n");
+void hint(char* ip_address, char* port, char* plid, struct addrinfo *res){
+    
 
-    char message[8];
-    bzero(message, 8);
-    //sprintf(message,"ULS %s\n",groupID);
+    char message[15];
+    bzero(message, 15);
+    sprintf(message,"GHL %s\n",plid);
     if (tcpConnect(ip_address, port, &tcpSocket, res) == -1 || tcpSend(message, strlen(message)) == -1)
         return;
 
     printf("liguei\n");
+
+    char result[5];
+    bzero(result, 5);
+
+    ssize_t nread = tcpRead(result, 4);
+    printf("r: %s\n", result);
+
+    char status[4];
+    bzero(status, 4);
+
+    nread = tcpRead(status, 3);
+    printf("r: %s\n", status);
+
+    if (!strcmp(status, "OK ")) {
+
+        char fileName[30];
+        bzero(fileName, 30);
+        int index = 0;
+
+        while(true) {
+            //printf("fleName: %s\n", fileName);
+            nread = tcpRead(fileName+index, 1);
+            if (nread == -1) return;
+
+            if (fileName[index] == ' ') {
+                fileName[index] = '\0';
+                break;
+            }
+
+            if (index == 30) {
+                close(tcpSocket);
+                puts("Nome muito comprido?");
+                return;
+            }
+            index++;
+        }
+
+        printf("f: %s\n", fileName);
+
+        char size[20];
+        index = 0;
+
+        while(true) {
+            //printf("fleName: %s\n", fileName);
+            nread = tcpRead(size+index, 1);
+            if (nread == -1) return;
+
+            if (size[index] == ' ') {
+                size[index] = '\0';
+                break;
+            }
+
+            if (index == 20) {
+                close(tcpSocket);
+                puts("Nome muito comprido?");
+                return;
+            }
+            index++;
+        }
+        int sizeInt = atoi(size);
+        printf("%d\n", sizeInt);
+
+        char data[sizeInt];
+        nread = tcpRead(data, sizeInt);
+
+        printf("data: %s\n", data);
+
+        char filePath[40];
+        sprintf(filePath, "FILES/%s", fileName);
+        FILE* image = fopen(filePath, "w");
+        
+        fwrite(data, 1, sizeof(data), image);
+        fclose(image);
+
+    }
+
     close(tcpSocket);
     return;
 }
