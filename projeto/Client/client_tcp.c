@@ -3,15 +3,7 @@
 
 int tcpSocket;
 
-/**
- * @brief Creates a tcp socket and connects it to the server.
- * 
- * @param ip_address the IP address where the packets will be sent.
- * @param port the port used to send the packets to the desired IP address.
- * @param fd the tcp socket used to communicate.
- * @param res information about the address of the service provider.
- * @return the value that indicates success or failure of the connection attempt.
- */
+
 int tcpConnect(char* ip_address, char* port, int* fd, struct addrinfo *res){
     int value;
     tcpSocket = create_socket(&res, SOCK_STREAM, ip_address, port);
@@ -22,13 +14,7 @@ int tcpConnect(char* ip_address, char* port, int* fd, struct addrinfo *res){
     return value;
 }
 
-/**
- * @brief Send a message to the server with a fixed size in bytes (TCP).
- * 
- * @param message the message sent to the server.
- * @param size the size of the message sent.
- * @return the value that indicates success or failure. 
- */
+
 int tcpSend(char* message, int size){
     ssize_t nleft = size, nwritten;
     char *ptr = message;
@@ -45,13 +31,7 @@ int tcpSend(char* message, int size){
     return 1;
 }
 
-/**
- * @brief Read a message from the server with a fixed size in bytes (TCP).
- * 
- * @param buffer the message that was sent by the server.
- * @param size the size of the buffer.
- * @return the value that indicates success or failure. 
- */
+
 int tcpRead(char* buffer, ssize_t size){
     ssize_t nleft = size, nread;
     char *ptr = buffer;
@@ -137,35 +117,20 @@ void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) 
             return;
         }
 
+        char size[3];
+        nread = tcpRead(size, 3);
+        int sizeInt = atoi(size);
 
         char score[5], playerID[8], word[MAX_WORD_LEN], suc[3], plays[3];
-        char line[12800];
+        char line[sizeInt];
+        bzero(line, sizeInt);
 
-        index = 0;
-        while(true) {
-            //printf("fleName: %s\n", fileName);
-            nread = tcpRead(line+index, 1);
-            if (nread == -1) return;
+        nread = tcpRead(line, sizeInt-1);
 
-            if (line[index] == '\n') {
-                fprintf(fp, "%s",line);
-            }
-
-            if (line[index] == '\0') {
-                fprintf(fp, "%s",line);
-                break;
-            }
-
-            if (index == 12800) {
-                close(tcpSocket);
-                puts("Nome muito comprido?");
-                return;
-            }
-            index++;
-        }
+        
         
         fprintf(fp, "%s",line);
-        
+        printf("%s", line);
         fclose(fp);
     }
 }
@@ -251,5 +216,88 @@ void hint(char* ip_address, char* port, char* plid, struct addrinfo *res){
 
     close(tcpSocket);
     return;
+}
+
+
+void state(char* ip_address, char* port, char* plid, struct addrinfo *res) {
+
+    char message[15];
+    bzero(message, 15);
+    sprintf(message,"STA %s\n",plid);
+    if (tcpConnect(ip_address, port, &tcpSocket, res) == -1 || tcpSend(message, strlen(message)) == -1)
+        return;
+
+    char result[5];
+    bzero(result, 5);
+
+    char status[4];
+    bzero(status, 4);
+
+
+    ssize_t nread = tcpRead(result, 4);
+    nread = tcpRead(status, 3);
+
+    if (!strcmp(status, "ACT")) { 
+        char aux[2];
+        nread = tcpRead(aux, 1);
+
+         char fileName[30];
+        bzero(fileName, 30);
+        int index = 0;
+
+        while(true) {
+            //printf("fleName: %s\n", fileName);
+            nread = tcpRead(fileName+index, 1);
+            if (nread == -1) return;
+
+            if (fileName[index] == ' ') {
+                fileName[index] = '\0';
+                break;
+            }
+
+            if (index == 30) {
+                close(tcpSocket);
+                puts("Nome muito comprido?");
+                return;
+            }
+            index++;
+        }
+
+        char size[5];
+
+        index = 0;
+        while(true) {
+            //printf("fleName: %s\n", fileName);
+            nread = tcpRead(size+index, 1);
+            if (nread == -1) return;
+
+            if (size[index] == ' ') {
+                size[index] = '\0';
+                break;
+            }
+
+            if (index == 6) {
+                close(tcpSocket);
+                puts("Nome muito comprido?");
+                return;
+            }
+            index++;
+        }
+
+        int sizeInt = atoi(size);
+
+        char data[sizeInt];
+        bzero(data, sizeInt+1);
+        
+        char filePath[40];
+        sprintf(filePath, "FILES/%s", fileName);
+        FILE* state = fopen(filePath, "w");
+        
+        nread = tcpRead(data, sizeInt);
+        printf("%s", data);
+        fwrite(data, 1, sizeof(data), state);
+        fclose(state);
+
+    }
 }
 

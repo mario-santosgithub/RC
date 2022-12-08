@@ -148,7 +148,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         scoreboard(ip_address, port, plid, res);
     }
 
-    else if (!strcmp(name, "hint") || !strcmp(name, "ul")){
+    else if (!strcmp(name, "hint") || !strcmp(name, "h")){
         
 
 
@@ -159,7 +159,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
     } 
 
     else if (strcmp(name, "state") == 0 || strcmp(name, "st") == 0 )  {
-       
+       state(ip_address, port, plid, res);
     }
 
     else if (strcmp(name, "quit") == 0 )  {
