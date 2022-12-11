@@ -16,9 +16,14 @@
 
 #define ERR_MSG "ERR\n"
 
+
+#define BUF_SIZE 128
 #define MAX_WORD_LEN 50
 #define SIZE 512
 #define BUFFER_SIZE 128
+
+
+
 
 
 /* UDP functions */

@@ -40,7 +40,7 @@ bool checkFlags(int argc, char** argv) {
 int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port){
     int sockfd = socket(AF_INET,socktype,0);
     if (sockfd == -1){
-        puts(SOCK_FAIL);
+        puts("SOCK_FAIL");
         exit(EXIT_FAILURE);
     }
     struct addrinfo hints;
@@ -48,7 +48,7 @@ int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* p
     hints.ai_family = AF_INET;
     hints.ai_socktype = socktype;
     if(getaddrinfo(ip_address, port, &hints, res) != 0){
-        puts(ADDR_FAIL);
+        puts("ADDR_FAIL");
         exit(EXIT_FAILURE);
     }
     return sockfd;
@@ -69,7 +69,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
     bzero(arg2, SIZE);
     bzero(arg3, SIZE);
     if (sscanf(command, "%s ", name) < 1){ // Check if there's at least a command name
-        puts(INVALID_CMD);
+        puts("INVALID_CMD");
         return;
     }
     command += strlen(name) + 1; // The name has already been read!
@@ -211,7 +211,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         }
     }
     else
-        puts(INVALID_CMD);
+        puts("INVALID_CMD");
 }
 
 
