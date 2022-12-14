@@ -9,4 +9,4 @@ GS: Server/server_main.o Server/server_udp.o Server/server_tcp.o
 	gcc -o GS common.o Server/server_main.o Server/server_udp.o Server/server_tcp.o
 
 clean:
-	rm -rf Client/*.o Server/*.o *.o player GS FILES
+	rm -rf Client/*.o Server/*.o *.o player GS PLAYERFILES

@@ -16,8 +16,13 @@
 #include <sys/stat.h>
 
 #define BUFF_SIZE 128
+#define SIZE 512
 
 
+bool start(int udpSocket, char* plid, bool verbose);
+
+
+int udpSend(int udpSocket, char* message, bool verbose);
 int main(int argc, char** argv);
 bool checkPort(char* port);
 

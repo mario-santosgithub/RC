@@ -107,8 +107,8 @@ void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) 
         }
 
 
-        char filePath[40];
-        sprintf(filePath, "FILES/%s", fileName);
+        char filePath[50];
+        sprintf(filePath, "PLAYERFILES/%s", fileName);
         FILE* fp = fopen(filePath, "wb");
 
         if (!fp) {
@@ -205,8 +205,8 @@ void hint(char* ip_address, char* port, char* plid, struct addrinfo *res){
         char data[sizeInt];
         nread = tcpRead(data, sizeInt);
 
-        char filePath[40];
-        sprintf(filePath, "FILES/%s", fileName);
+        char filePath[50];
+        sprintf(filePath, "PLAYERFILES/%s", fileName);
         FILE* image = fopen(filePath, "w");
         
         fwrite(data, 1, sizeof(data), image);
@@ -289,8 +289,8 @@ void state(char* ip_address, char* port, char* plid, struct addrinfo *res) {
         char data[sizeInt];
         bzero(data, sizeInt+1);
         
-        char filePath[40];
-        sprintf(filePath, "FILES/%s", fileName);
+        char filePath[50];
+        sprintf(filePath, "PLAYERFILES/%s", fileName);
         FILE* state = fopen(filePath, "w");
         
         nread = tcpRead(data, sizeInt);

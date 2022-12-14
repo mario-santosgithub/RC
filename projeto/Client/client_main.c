@@ -362,8 +362,8 @@ int main(int argc, char** argv){
     bzero(groupID, 3);
 
     // Create a folder for the files that are downloaded using the retrieve command
-    if (mkdir("FILES", 0700) == -1 && access("FILES", F_OK)){
-        puts("DOWNLOADS_FAIL");
+    if (mkdir("PLAYERFILES", 0700) == -1 && access("PLAYERFILES", F_OK)){
+        puts("PLAYER_FAIL");
         exit(EXIT_FAILURE);
     }
 
