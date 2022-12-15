@@ -14,7 +14,7 @@ bool checkPort(char* port) {
     }
 }
 
-bool executeUDP(int udpSocket, char* message, bool verbose) {
+bool executeUDP(int udpSocket, char* message, char* fileName, bool verbose) {
     
     char opCode[4], arg1[SIZE], arg2[SIZE], arg3[SIZE];
     char delim1, delim2, delim3, delim4;
@@ -31,7 +31,7 @@ bool executeUDP(int udpSocket, char* message, bool verbose) {
         sscanf(message, "%c%[^ \n]%c", &delim1, arg1, &delim2);
 
         printf("arg1: %s\n", arg1);
-        return delim1 == ' ' && delim2 == '\n' && start(udpSocket, arg1, verbose); 
+        return delim1 == ' ' && delim2 == '\n' && start(udpSocket, arg1, fileName, verbose); 
             
 
     }
@@ -68,7 +68,7 @@ int socket_bind(int socktype, char* port, struct addrinfo** res){
     int fd = socket(AF_INET, socktype, 0);
 
     if(fd == -1) {
-        puts("Erro ao criar a socket");
+        puts("Error creating socket");
         close(fd);
         exit(1);
     }
@@ -81,13 +81,13 @@ int socket_bind(int socktype, char* port, struct addrinfo** res){
     hints.ai_flags = AI_PASSIVE;
 
     if (getaddrinfo(NULL, port, &hints, res) != 0) {
-        puts("ADDR_FAIL");
+        puts("Error with the getter addr info");
         close(fd);
         exit(1);
     }
 
     if (bind(fd, (*res)->ai_addr, (*res)->ai_addrlen) == -1) {
-        puts("BIND_FAIL");
+        puts("Error with the bind");
         close(fd);
         exit(1); 
     }
@@ -156,14 +156,18 @@ int main(int argc, char** argv) {
 
     // Create a folder for the files that are downloaded using the retrieve command
     char path[70];
-    sprintf(path, "SERVERFILES/%s", wordFile);
-    FILE *file = fopen(path, "r");
-    
-    if (!file) {
-            puts("Erro ao abrir");
-            return 0;
-        }
+    sprintf(path, "Server/%s", wordFile);
 
+    if (mkdir("Server/GAMES", 0700) == -1 && access("Server/GAMES", F_OK)){
+        puts("GAMES fail");
+        exit(EXIT_FAILURE);
+    }
+
+    if (mkdir("Server/SCORES", 0700) == -1 && access("Server/SOCRES", F_OK)){
+        puts("SCORES fail");
+        exit(EXIT_FAILURE);
+    }
+    
     struct addrinfo *res;
     int udpSocket = socket_bind(SOCK_DGRAM, port, &res);
     // int tcpSocket = socket_bind(SOCK_STREAM, port, &res);
@@ -178,8 +182,8 @@ int main(int argc, char** argv) {
         udpReceive(udpSocket, message);
         printf("message: %s\n", message);
 
-        if (!executeUDP(udpSocket, message, verbose)) {
-            printf("ERR\n");
+        if (!executeUDP(udpSocket, message, wordFile,verbose)) {
+            printf("Error executing UDP\n");
         }
         else {
             printf("executeUDP true\n");

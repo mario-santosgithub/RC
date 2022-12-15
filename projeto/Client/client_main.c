@@ -106,7 +106,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         if (strlen(letter) == 1) {
             if (*letter < 'A' || ('Z' < *letter && *letter < 'a') || 'z' < *letter) { 
                 
-                printf(ERR_MSG);
+                printf("Not a valid letter\n");
                 return;    
             }
 
@@ -195,7 +195,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         if (strlen(plid) == 6) {
             while (*plid) {
                 if (*plid < '0' || *plid > '9') { 
-                    printf(ERR_MSG);
+                    printf("ERR_MSG: Invalid Player ID\n");
                     return;    
                 }
                 ++plid;
@@ -362,7 +362,7 @@ void displayGame(char* buffer, char* letter) {
         sprintf(output, "Internal Error with your request");
     }
 
-    else {puts(ERR_MSG);}
+    else {puts("Error receiving answer");}
     puts(output);
 
 }

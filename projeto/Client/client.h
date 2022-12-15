@@ -14,7 +14,6 @@
 #include <dirent.h>
 #include <stdbool.h>
 
-#define ERR_MSG "ERR\n"
 
 
 #define BUF_SIZE 128

@@ -7,7 +7,7 @@ int udpTransmission(int fd, struct addrinfo *res, char* message, char* buffer, i
     ssize_t nbytes = sendto(fd, message, strlen(message), 0, res->ai_addr, res->ai_addrlen);
     
     if (nbytes == -1) {
-        printf(ERR_MSG);
+        printf("Error with communication with UDP\n");
         return -1;
     } 
 
@@ -34,7 +34,7 @@ void start(int fd, char* plid, struct addrinfo *res) {
     
     
     if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ){
-        printf(ERR_MSG);
+        printf("Error with communication with UDP\n");
         return;
     };
 
@@ -52,7 +52,7 @@ int play(int fd, char* plid, char* letter, int turn, struct addrinfo *res) {
 
 
     if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ){
-        printf(ERR_MSG);
+        printf("Error with communication with UDP\n");
         return -1;
     };
 
@@ -70,7 +70,7 @@ void kill(int fd, char* plid, struct addrinfo *res) {
     
     
     if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ){
-        printf(ERR_MSG);
+        printf("Error with communication with UDP\n");
         return;
     };
     return;
@@ -86,7 +86,7 @@ void guess(int fd, char* plid, char* word, int turn, struct addrinfo *res) {
         return;
     }
     if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ) {
-        printf(ERR_MSG);
+        printf("Error with communication with UDP\n");
         return;
     }
 
@@ -101,7 +101,7 @@ void quit(int fd, char* plid, struct addrinfo *res) {
     
     
     if(udpTransmission(fd, res, message, buffer, BUFFER_SIZE) == -1 ){
-        printf(ERR_MSG);
+        printf("Error with communication with UDP\n");
         return;
     };
 
