@@ -81,7 +81,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         if (strlen(plid) == 6) {
             while (*plid) {
                 if (*plid < '0' || *plid > '9') { 
-                    printf("ERR_MSG");
+                    printf("ERR_MSG: Invalid Player ID\n");
                     return;    
                 }
                 ++plid;
@@ -90,13 +90,16 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
             start(udp_socket, plid, res);
         }
         else {
-            printf("ERR_MSG");
+            printf("ERR_MSG: Invalid Player ID\n");
             return;
         }
         return;
     }
     else if (strcmp(name, "play") == 0 || strcmp(name, "pl") == 0 )  {
-        
+        if (strlen(word) == 0) {
+            printf("Internal error: No given plid.\n");
+            return;
+        }
         char letter[2]; 
         sscanf(command, "%s", letter);
 
@@ -115,7 +118,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
             
         }
         else {
-            printf(ERR_MSG);
+            printf("Format error!\n");
             return;
         }
         
@@ -130,7 +133,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
 
         for (int i=0; i<size; i++) {
             if (guessWord[i] <'A' || ('Z' < guessWord[i] && guessWord[i] <'a') || 'z' < guessWord[i]) {
-                printf(ERR_MSG);
+                printf("Invalid Word.\n");
                 return;
             }
 
@@ -149,10 +152,6 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
     }
 
     else if (!strcmp(name, "hint") || !strcmp(name, "h")){
-        
-
-
-        
 
         hint(ip_address, port, plid, res);
     
@@ -167,7 +166,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         if (strlen(plid) == 6) {
             while (*plid) {
                 if (*plid < '0' || *plid > '9') { 
-                    printf(ERR_MSG);
+                    printf("ERR_MSG: Invalid Player ID\n");
                     return;    
                 }
                 ++plid;
@@ -176,7 +175,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
             quit(udp_socket, plid, res);
         }
         else {
-            printf(ERR_MSG);
+            printf("ERR_MSG: Invalid Player ID\n");
             return;
         }
         
@@ -206,7 +205,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
             kill(udp_socket, plid, res);
         }
         else {
-            printf(ERR_MSG);
+            printf("ERR_MSG: Invalid Player ID\n");
             return;
         }
     }
@@ -241,9 +240,12 @@ void displayGame(char* buffer, char* letter) {
         }
 
     }
-
     else if (strcmp(val, "RSG") == 0 && strcmp(arg1, "NOK") == 0) {
-        sprintf(output, "This player has already started a game!");
+        sprintf(output, "Error: This player has already started a game!");
+
+    }    
+    else if (strcmp(val, "RSG") == 0 && strcmp(arg1, "ERR") == 0) {
+        sprintf(output, "Error: Syntax Error");
 
     }
     else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "OK") == 0) {
@@ -305,6 +307,27 @@ void displayGame(char* buffer, char* letter) {
             sprintf(output, "WELL DONE! You guessed: %s", letter);
         }
     }
+
+    else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "OVR") == 0) {
+
+        sprintf(output, "That was not the correct word! You have no more chances to guess. Game over!");
+    }
+
+    else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "INV") == 0) {
+
+        sprintf(output, "Internal Error: Problem with the turn count!");
+    }
+
+    else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "ERR") == 0) {
+
+        sprintf(output, "The player is not in a game!");
+    }
+
+    else if (strcmp(val, "RWG") == 0 && strcmp(arg1, "DUP") == 0) {
+        sprintf(output, "You have already played the letter \"%s\"!: ", letter);
+        strcat(output, word);
+        turn -= 1;
+    }
     
     else if (strcmp(val, "RWG")== 0 && strcmp(arg1, "NOK") == 0) {
 
@@ -314,15 +337,31 @@ void displayGame(char* buffer, char* letter) {
 
     else if (strcmp(val, "RWG")== 0 && strcmp(arg1, "OVR") == 0) {
 
-        sprintf(output, "That was not the correct word! You have no more chances to guess.");
+        sprintf(output, "That was not the correct word! You have no more chances to guess. Game over!");
         
     }
 
     else if (strcmp(val, "RWG")== 0 && strcmp(arg1, "INV") == 0) {
 
-        sprintf(output, "Problem with the turn count!");
+        sprintf(output, "Internal Error: Problem with the turn count!");
         
     }
+
+    else if (strcmp(val, "RWG") == 0 && strcmp(arg1, "ERR") == 0) {
+
+        sprintf(output, "Internal error: PWG sent with syntax error!\n");
+    }
+
+    else if (strcmp(val, "RQT") == 0 && strcmp(arg1, "NOK") == 0) {
+
+        sprintf(output, "No ongoing game for this Player IDS");
+    }
+
+    else if (strcmp(val, "RQT") == 0 && strcmp(arg1, "ERR") == 0) {
+
+        sprintf(output, "Internal Error with your request");
+    }
+
     else {puts(ERR_MSG);}
     puts(output);
 
