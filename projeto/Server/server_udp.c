@@ -45,9 +45,10 @@ bool start(int udpSocket, char* plid, char* fileName, bool verbose){
                 fclose(state);
                 return true;
             }
+            else if(holder == EOF) {break;}
         }
         newWord = false;
-        
+        printf("here");
         fclose(state);
     }
 
@@ -144,4 +145,60 @@ bool start(int udpSocket, char* plid, char* fileName, bool verbose){
     
     udpSend(udpSocket, messageSent, verbose);
     return true;
+}
+
+
+bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
+    if (verbose)
+        printf("PLID: %s\n", plid);
+
+    // Check if Plid only has digits
+    if (strlen(plid) == 6) {
+        while (*plid) {
+            if (*plid < '0' || *plid > '9') { 
+                udpSend(udpSocket, "RSG ERR\n", verbose);
+                return true;    
+            }
+            ++plid;
+        }
+        plid = plid - 6;
+    }
+    else {
+        udpSend(udpSocket, "RSG ERR\n", verbose);
+        return true;
+    }
+
+    char path[30];
+    sprintf(path, "Server/GAMES/GAME_%s.txt", plid);
+    FILE* playerState = fopen(path, "wb");
+    int checkTrial = 1;
+    int trialInt = atoi(trial);
+
+    if (access(path, F_OK) != 0) {
+        udpSend(udpSocket, "RLG ERR\n", verbose);
+    }
+
+
+    if (access(path, F_OK) == 0) {
+        
+        FILE* state = fopen(path, "wb");
+        char holder;
+        int currentLine = 0;
+
+        while(true) {
+            holder=fgetc(state);
+            
+            if(holder == EOF) { 
+                break;
+            }
+        }
+        printf("here");
+        fclose(state);
+    }
+    
+
+    printf("p: %s\n", plid);
+    printf("t: %d\n", trialInt);
+    
+    
 }

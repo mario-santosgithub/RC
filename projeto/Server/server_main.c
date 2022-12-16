@@ -23,17 +23,19 @@ bool executeUDP(int udpSocket, char* message, char* fileName, bool verbose) {
     bzero(arg2, SIZE);
     bzero(arg3, SIZE);
     sscanf(message, "%[^ \n]", opCode);
-    printf("here\n");
+    
     message += strlen(opCode);
     if (!strcmp(opCode, "SNG")){
 
         //Player request to start a game
         sscanf(message, "%c%[^ \n]%c", &delim1, arg1, &delim2);
 
-        printf("arg1: %s\n", arg1);
         return delim1 == ' ' && delim2 == '\n' && start(udpSocket, arg1, fileName, verbose); 
-            
-
+    }
+    else if(!strcmp(opCode, "PLG")) {
+        sscanf(message, "%c%[^ \n]%c%[^ \n]%c%[^ \n]%c", &delim1, arg1, &delim2, arg2, &delim3, arg3, &delim4);
+        
+        return delim1 == ' ' && delim2 == ' ' && delim3 == ' ' && delim4 == '\n' && play(udpSocket, arg1, arg2, arg3, verbose);
     }
 }
 
