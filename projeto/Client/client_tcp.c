@@ -68,20 +68,18 @@ void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) 
 
     ssize_t nread = tcpRead(result,4);
     if (nread == -1) return;
-    
-    printf("result: %s\n",result);
+ 
 
     char status[4];
     bzero(status, 4);
 
     nread = tcpRead(status, 3);
     if (nread == -1) return;
-    printf("status: %s\n", status);
+
 
     char endOfMsg[2];
     bzero(endOfMsg, 2);
 
-    if (strcmp(status, "OK ") == 0) {printf("ok\n");}
 
     if (strcmp(status, "OK ") == 0) {
         char fileName[30];

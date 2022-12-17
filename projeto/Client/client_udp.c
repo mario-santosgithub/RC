@@ -2,6 +2,20 @@
 #include "../common.h"
 
 
+int timerOn(int sd, int time){
+    struct timeval tmout;
+    memset((char *)&tmout,0,sizeof(tmout)); /* Clear time structure. */
+    tmout.tv_sec = time;
+    return setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tmout,sizeof(struct timeval));
+}
+
+
+int timerOff(int sd){
+    struct timeval tmout;
+    memset((char *)&tmout,0,sizeof(tmout)); /* Clear time structure */
+    return setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tmout,sizeof(struct timeval));
+}
+
 int udpTransmission(int fd, struct addrinfo *res, char* message, char* buffer, int size) {
 
     ssize_t nbytes = sendto(fd, message, strlen(message), 0, res->ai_addr, res->ai_addrlen);
@@ -15,7 +29,9 @@ int udpTransmission(int fd, struct addrinfo *res, char* message, char* buffer, i
     socklen_t addrlen = sizeof(addr);
     
     while(true) {
+        timerOn(fd, 5);
         nbytes = recvfrom(fd, buffer, size, 0, (struct sockaddr*)&addr, &addrlen);
+        timerOff(fd);
         
         if (nbytes == -1) {
             printf("Internal Server Error: Try again\n");

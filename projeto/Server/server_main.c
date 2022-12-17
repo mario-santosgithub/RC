@@ -37,6 +37,12 @@ bool executeUDP(int udpSocket, char* message, char* fileName, bool verbose) {
         
         return delim1 == ' ' && delim2 == ' ' && delim3 == ' ' && delim4 == '\n' && play(udpSocket, arg1, arg2, arg3, verbose);
     }
+
+    else if(!strcmp(opCode, "PWG")) {
+        sscanf(message, "%c%[^ \n]%c%[^ \n]%c%[^ \n]%c", &delim1, arg1, &delim2, arg2, &delim3, arg3, &delim4);
+
+        return delim1 == ' ' && delim2 == ' ' && delim3 == ' ' && delim4 == '\n' && guess(udpSocket, arg1, arg2, arg3, verbose);
+    }
 }
 
 int udpSend(int udpSocket, char* message, bool verbose) {
