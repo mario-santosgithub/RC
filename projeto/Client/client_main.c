@@ -219,7 +219,7 @@ void displayGame(char* buffer, char* letter) {
     char val[BUFFER_SIZE], arg1[31];
     char output[BUFFER_SIZE];
     int n;
-    
+    printf("buffer: %s\n", buffer);
     sscanf(buffer, "%s %s", val, arg1);
     buffer += strlen(val) + strlen(arg1) + 2;
     

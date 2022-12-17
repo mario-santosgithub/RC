@@ -360,3 +360,39 @@ bool guess(int udpSocket, char* plid, char* word, char* trial, bool verbose) {
     udpSend(udpSocket, message, verbose);
 
 }
+
+bool exitUDP(int udpSocket, char* plid, bool verbose) {
+
+    quitUDP(udpSocket, plid, verbose);
+    return true;
+
+}
+
+bool quitUDP(int udpSocket, char* plid, bool verbose) {
+    if (strlen(plid) == 6) {
+        while (*plid) {
+            if (*plid < '0' || *plid > '9') { 
+                udpSend(udpSocket, "RLG ERR\n", verbose);
+                return true;    
+            }
+            ++plid;
+        }
+        plid = plid - 6;
+    }
+    else {
+        udpSend(udpSocket, "RLG ERR\n", verbose);
+        return true;
+    }
+
+    
+    char path[30];
+    sprintf(path, "Server/GAMES/GAME_%s.txt", plid);
+
+    if (access(path, F_OK) != 0) {
+        return true;
+    }
+
+    int k = remove(path);
+    printf("%d\n", k);
+    return true;
+}

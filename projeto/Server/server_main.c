@@ -43,6 +43,11 @@ bool executeUDP(int udpSocket, char* message, char* fileName, bool verbose) {
 
         return delim1 == ' ' && delim2 == ' ' && delim3 == ' ' && delim4 == '\n' && guess(udpSocket, arg1, arg2, arg3, verbose);
     }
+    else if(!strcmp(opCode, "QUT")) {
+        sscanf(message, "%c%[^ \n]%c", &delim1, arg1, &delim2);
+
+        return delim1 == ' ' && delim2 == '\n' && quitUDP(udpSocket, arg1, verbose);
+    }
 }
 
 int udpSend(int udpSocket, char* message, bool verbose) {

@@ -22,6 +22,8 @@
 bool start(int udpSocket, char* plid, char* fileName, bool verbose);
 bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose);
 bool guess(int udpSocket, char* plid, char* word, char* trial, bool verbose);
+bool exitUDP(int udpSocket, char* plid, bool verbose);
+bool quitUDP(int udpSocket, char* plid, bool verbose);
 
 int udpSend(int udpSocket, char* message, bool verbose);
 int main(int argc, char** argv);
