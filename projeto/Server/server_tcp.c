@@ -87,8 +87,31 @@ bool hint(int fd, bool verbose) {
         i++;
 
     }
-    printf("image: %s\n", imageName);
-
     fclose(player);
+
+    //sprintf(imagePath, "Server/%s.jpg", imageName);
+    //sprintf(imagePath, "%s", "Server/banana.jpg");
+
+    FILE* image = fopen("Server/banana.jpg", "r");
+
+    fseek(image, 0L, SEEK_END);
+  
+    // tamanho do ficheiro
+    long int fileSize = ftell(image);
+    printf("size: %ld\n", fileSize);
+    
+
+    char data[fileSize];
+    fread(data, fileSize, 1, image);
+    printf("data: %s", data);
+    fclose(image);
+
+    char message[fileSize+12+sizeof("banana.jpg")+sizeof(fileSize)];
+    sprintf(message, "RHL OK %s %ld %s\n", "banana.jpg", fileSize, data);
+    printf("buffer: %s\n", message);
+
+    if(tcpSend(fd, message, strlen(message)) == -1) {
+        return true;
+    }
     return true;
 }
