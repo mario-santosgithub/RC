@@ -50,6 +50,14 @@ bool executeUDP(int udpSocket, char* message, char* fileName, bool verbose) {
     }
 }
 
+bool executeTCP(int fd, char *message, bool verbose) {
+
+    if (!strcmp(message, "GHL ")) {
+        return hint(fd, verbose);
+    }
+    return false;
+}
+
 int udpSend(int udpSocket, char* message, bool verbose) {
 
     if (verbose) { printf("Message Sent: %s", message); }
@@ -183,30 +191,54 @@ int main(int argc, char** argv) {
     
     struct addrinfo *res;
     int udpSocket = socket_bind(SOCK_DGRAM, port, &res);
-    // int tcpSocket = socket_bind(SOCK_STREAM, port, &res);
-
+    int tcpSocket = socket_bind(SOCK_STREAM, port, &res);
+    listen(tcpSocket, 10);
     char message[BUFF_SIZE];
+    fd_set rset;
+    int fd;
 
-
+    int maxfd = udpSocket > tcpSocket ? udpSocket + 1 : tcpSocket + 1;
     while(true) {   
 
-        // UDP
-        bzero(message, sizeof(message));
-        udpReceive(udpSocket, message);
-        printf("message: %s\n", message);
+        FD_SET(udpSocket, &rset);
+        FD_SET(tcpSocket, &rset);
 
-        if (!executeUDP(udpSocket, message, wordFile,verbose)) {
-            printf("Error executing UDP\n");
+        int ready = select(maxfd, &rset, NULL, NULL, NULL);
+        // TCP
+        if (FD_ISSET(tcpSocket, &rset)) {
+            socklen_t len = sizeof(clientAddr);
+            fd = accept(tcpSocket, (struct sockaddr*)&clientAddr, &len);
+            bzero(message, sizeof(message));
+            tcpRead(fd, message, 4);
+            if (verbose) {
+                puts("tcp verbose");
+            }
+            if(!executeTCP(fd, message, verbose)){
+                tcpSend(fd, "ERR\n", 4);
+            }
+            close(fd);
         }
-        else {
-            printf("executeUDP true\n");
+
+        // UDP
+        if (FD_ISSET(udpSocket, &rset)) {
+            printf("udp here\n");
+            bzero(message, sizeof(message));
+            udpReceive(udpSocket, message);
+            printf("message: %s\n", message);
+
+            if (!executeUDP(udpSocket, message, wordFile,verbose)) {
+                udpSend(udpSocket, "ERR\n", verbose);
+            }
+            else {
+                printf("executeUDP true\n");
+            }
         }
 
     }
 
 
     close(udpSocket);
-    //close(tcpSocket);
+    close(tcpSocket);
     freeaddrinfo(res);
     return 0;
 }
