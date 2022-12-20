@@ -102,6 +102,7 @@ bool hint(int fd, bool verbose) {
     
 
     char data[fileSize];
+    
     fread(data, fileSize, 1, image);
     printf("data: %s", data);
     fclose(image);

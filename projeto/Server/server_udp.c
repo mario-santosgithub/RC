@@ -173,11 +173,12 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
 
     char path[30];
     sprintf(path, "Server/GAMES/GAME_%s.txt", plid);
-    int checkTrial = 1;
     int trialInt = atoi(trial);
 
+    // verificar se está em jogo
     if (access(path, F_OK) != 0) {
         udpSend(udpSocket, "RLG ERR\n", verbose);
+        return true;
     }
 
     char line[10];
@@ -220,7 +221,7 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
     }
     fclose(playerState);
     wordLen--;
-    int currentErrors = 0;
+    int currentErrors = 0, correctLetters = 0;
 
     if (j == 0) {
 
@@ -242,6 +243,7 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
                 for (int k=0; k<wordLen; k++) {
                     if (holder == word[k]) {
                         inWord=true;
+                        correctLetters++;
                     };
                 }
                 if (inWord == false) {
@@ -262,7 +264,6 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
 
         // check errors
         fclose(playerState);
-
         udpSend(udpSocket, "RLG NOK\n", verbose);
         printf("c: %d\n", currentErrors);
         playerState = fopen(path, "a");
@@ -287,6 +288,22 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
     fclose(playerState);
 
     char message[BUFF_SIZE];
+    // check if its over with a win
+
+    playerState = fopen(path, "r"); // demasiadas igualdades no if, talvez arranjar mais alguma verificação
+    int counter = 0;
+    while ((holder = fgetc(playerState)) != EOF) {
+        for(int k=0; k<wordLen; k++) {
+            if(holder == word[k]) {
+                printf("h: %c\n", holder);
+                printf("w: %c\n", word[k]);
+                counter++;
+            }
+        }
+    }
+    fclose(playerState);
+
+    printf("counter: %d\n", counter);
 
     sprintf(message, "RLG OK %d %d", trialInt, j);
     i=0;
