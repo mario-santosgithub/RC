@@ -259,6 +259,25 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
 
         if (currentErrors >= errors) {
             udpSend(udpSocket, "RLG OVR\n", verbose);
+
+            char newPath[50];
+            char newFileName[50];
+            sprintf(newPath, "Server/GAMES/%s", plid);
+            if (access(newPath, F_OK) != 0) {
+                mkdir(newPath, 0700);
+            }
+
+            time_t t = time(NULL);
+            struct tm tm = *localtime(&t);
+
+            sprintf(newPath, "Server/GAMES/%s/%d%d%d_%d%d%d_F.txt", plid, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+            playerState = fopen(path, "r");
+
+            rename(path, newPath);
+
+        
+            fclose(playerState);
             return true;
         }
 
@@ -290,19 +309,52 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
     char message[BUFF_SIZE];
     // check if its over with a win
 
+
+    playerState = fopen(path, "a");
+
+
+    fprintf(playerState, "%s",line);
+    fclose(playerState);
+
     playerState = fopen(path, "r"); // demasiadas igualdades no if, talvez arranjar mais alguma verificação
     int counter = 0;
+    bool line1 = true;
     while ((holder = fgetc(playerState)) != EOF) {
         for(int k=0; k<wordLen; k++) {
-            if(holder == word[k]) {
+            if(holder == word[k] && line1 == false) {
                 printf("h: %c\n", holder);
                 printf("w: %c\n", word[k]);
                 counter++;
             }
         }
+        if (holder == '\n') { line1 = false; }
     }
     fclose(playerState);
 
+    if (counter == wordLen) {
+        sprintf(message, "RLG WIN %s", trial);
+        udpSend(udpSocket, message, verbose);
+
+        char newPath[50];
+        char newFileName[50];
+        sprintf(newPath, "Server/GAMES/%s", plid);
+        if (access(newPath, F_OK) != 0) {
+            mkdir(newPath, 0700);
+        }
+
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+
+        sprintf(newPath, "Server/GAMES/%s/%d%d%d_%d%d%d_W.txt", plid, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+        playerState = fopen(path, "r");
+
+        rename(path, newPath);
+
+    
+        fclose(playerState);
+        return true;
+    }
     printf("counter: %d\n", counter);
 
     sprintf(message, "RLG OK %d %d", trialInt, j);
@@ -316,11 +368,6 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
 
     strcat(message, "\n\0");
     printf("m: %s\n", message);
-    playerState = fopen(path, "a");
-
-
-    fprintf(playerState, "%s",line);
-    fclose(playerState);
     
     udpSend(udpSocket, message, verbose);
     

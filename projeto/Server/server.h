@@ -14,6 +14,7 @@
 #include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define BUFF_SIZE 128
 #define SIZE 512
