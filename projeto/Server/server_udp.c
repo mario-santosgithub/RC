@@ -1,9 +1,8 @@
 #include "server.h"
-#include "../common.h"
 
 
 
-
+int wordIndex = 0;
 
 
 bool start(int udpSocket, char* plid, char* fileName, bool verbose){
@@ -39,9 +38,10 @@ bool start(int udpSocket, char* plid, char* fileName, bool verbose){
         state = fopen(stateName, "rb");
         char holder;
         int currentLine = 0;
-
+        
         while(true) {
             holder=fgetc(state);
+            holder = toupper(holder);
             
             if(holder == '\n') { 
                 udpSend(udpSocket, "RSG NOK\n", verbose);
@@ -51,7 +51,6 @@ bool start(int udpSocket, char* plid, char* fileName, bool verbose){
             else if(holder == EOF) {break;}
         }
         newWord = false;
-        printf("here");
         fclose(state);
     }
 
@@ -66,9 +65,6 @@ bool start(int udpSocket, char* plid, char* fileName, bool verbose){
 
         FILE *words = fopen(path, "rb");
 
-        int wordIndex;
-        wordIndex = rand() % 5;
-
         // get the word
         int currentLine = 0;
         
@@ -79,11 +75,13 @@ bool start(int udpSocket, char* plid, char* fileName, bool verbose){
         char holder;
         while(currentLine != wordIndex) {
             holder=fgetc(words);
+            holder = toupper(holder);
             if(holder == '\n') { currentLine++; }
         }
 
         index = 0;
         while((holder = fgetc(words)) != EOF && holder != '\n') {
+            holder = toupper(holder);
             if (holder == ' ') break;
             word[index] = holder;
             index++;
@@ -112,6 +110,7 @@ bool start(int udpSocket, char* plid, char* fileName, bool verbose){
         char holder;
         
         while((holder = fgetc(state)) != EOF) {
+            holder = toupper(holder);
             if (holder == ' ') break;
             word[index] = holder;
             index++;
@@ -147,6 +146,12 @@ bool start(int udpSocket, char* plid, char* fileName, bool verbose){
     sprintf(messageSent, "RSG OK %ld %d\n", wordLen, errors);
     
     udpSend(udpSocket, messageSent, verbose);
+    if (wordIndex != 25) {
+        wordIndex++;
+    }
+    else {
+        wordIndex = 0;
+    }
     return true;
 }
 
@@ -172,6 +177,7 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
     }
 
     char path[30];
+    bzero(path, 30);
     sprintf(path, "Server/GAMES/GAME_%s.txt", plid);
     int trialInt = atoi(trial);
 
@@ -190,11 +196,12 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
     int indexes[50];
     char word[50];
     char holder, temp;
+    bzero(word, 50);
     temp = letter[0];
-    printf("t: %c\n", temp);
 
     int i=0, j=0, wordLen=0;
     while((holder = fgetc(playerState)) != EOF) {
+        holder = toupper(holder);
         if (holder == ' ') break;
         if (temp == holder) {
             indexes[j] = i+1;
@@ -207,10 +214,14 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
     fclose(playerState);
 
     playerState = fopen(path, "r");
+    bool firstLine = true;
     while((holder = fgetc(playerState)) != EOF) {
-        if (holder == 'T') {
+        holder = toupper(holder);
+        if (holder == '\n') { firstLine == false; }
+        if (holder == 'T' && firstLine == false) {
             holder = fgetc(playerState);
             holder = fgetc(playerState);
+            holder = toupper(holder);
 
             if (holder == temp) {
                 udpSend(udpSocket, "RLG DUP\n", verbose);
@@ -224,21 +235,22 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
     int currentErrors = 0, correctLetters = 0;
 
     if (j == 0) {
-
         playerState = fopen(path, "r");
         // verificar erros
-        printf("word: %s\n", word);
+        bool firstLine = true;
         while((holder = fgetc(playerState)) != EOF) {
-            if (holder == 'T') {
+            holder = toupper(holder);
+            if (holder == '\n') { firstLine = false; }
+            if (holder == 'T' && firstLine == false) {
                 holder = fgetc(playerState); // ' '
                 holder = fgetc(playerState);
+                holder = toupper(holder);
                 if (holder == temp) {
                         
                     udpSend(udpSocket, "RLG DUP\n", verbose);
                     return true;
                 
                 }
-                printf("h: %c\n", holder);
                 bool inWord=false;
                 for (int k=0; k<wordLen; k++) {
                     if (holder == word[k]) {
@@ -253,6 +265,7 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
         }
 
         int errors;
+        wordLen++;
         if (wordLen <= 6) { errors = 7; }
         else if (wordLen > 6 && wordLen < 11) { errors = 8; }
         else if (wordLen >= 11) { errors = 9; }
@@ -262,6 +275,8 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
 
             char newPath[50];
             char newFileName[50];
+            bzero(newFileName, 50);
+            bzero(newPath, 50);
             sprintf(newPath, "Server/GAMES/%s", plid);
             if (access(newPath, F_OK) != 0) {
                 mkdir(newPath, 0700);
@@ -280,11 +295,9 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
             fclose(playerState);
             return true;
         }
-
         // check errors
         fclose(playerState);
         udpSend(udpSocket, "RLG NOK\n", verbose);
-        printf("c: %d\n", currentErrors);
         playerState = fopen(path, "a");
         fprintf(playerState, "%s",line);
         fclose(playerState);
@@ -293,10 +306,10 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
     }
 
     // falta verificar o trial
-    
     // verificar se é uma letra duplicada
     i=0;
     while((holder = fgetc(playerState)) != EOF) {
+        holder = toupper(holder);
         if (temp == holder) {
             indexes[j] = i+1;
             j++;
@@ -304,34 +317,37 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
         i++;
     }
 
-    fclose(playerState);
 
     char message[BUFF_SIZE];
-    // check if its over with a win
+    bzero(message, BUFF_SIZE);
 
+    playerState = fopen(path, "a"); 
 
-    playerState = fopen(path, "a");
-
+    char lineaux[10];
+    strcpy(lineaux, line);
 
     fprintf(playerState, "%s",line);
-    fclose(playerState);
-
-    playerState = fopen(path, "r"); // demasiadas igualdades no if, talvez arranjar mais alguma verificação
+    playerState = fopen(path, "r"); 
     int counter = 0;
     bool line1 = true;
     while ((holder = fgetc(playerState)) != EOF) {
-        for(int k=0; k<wordLen; k++) {
-            if(holder == word[k] && line1 == false) {
-                printf("h: %c\n", holder);
-                printf("w: %c\n", word[k]);
-                counter++;
+        holder = toupper(holder);
+        if (holder == '\n') { line1 = false; }
+        if (line1 == false && holder == 'T') {
+            holder = fgetc(playerState);
+            holder = fgetc(playerState);
+            holder = toupper(holder);
+            for(int k=0; k<wordLen; k++) {
+                if(holder == word[k] && line1 == false) {
+                    counter++;
+                }
             }
         }
-        if (holder == '\n') { line1 = false; }
+    
     }
     fclose(playerState);
 
-    if (counter == wordLen) {
+    if (counter == wordLen-1) {
         sprintf(message, "RLG WIN %s", trial);
         udpSend(udpSocket, message, verbose);
 
@@ -355,7 +371,6 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
         fclose(playerState);
         return true;
     }
-    printf("counter: %d\n", counter);
 
     sprintf(message, "RLG OK %d %d", trialInt, j);
     i=0;
@@ -366,15 +381,15 @@ bool play(int udpSocket, char* plid, char* letter, char* trial, bool verbose) {
         i++;
     }
 
+    playerState = fopen(path, "a");
+    fprintf(playerState, "%s", line);
+    fclose(playerState);
     strcat(message, "\n\0");
-    printf("m: %s\n", message);
-    
     udpSend(udpSocket, message, verbose);
     
     
 }
 
-// se precisares de info para ler o ficheiro tens vários exemplos em cima
 bool guess(int udpSocket, char* plid, char* word, char* trial, bool verbose) {
     // Check if Plid only has digits
     if (strlen(plid) == 6) {
@@ -400,29 +415,119 @@ bool guess(int udpSocket, char* plid, char* word, char* trial, bool verbose) {
         udpSend(udpSocket, "RLG ERR\n", verbose);
     }
 
-    char line[10];
-    bzero(line, 10);
+    char line[50];
+    bzero(line, 50);
+    sprintf(line, "\nG %s", word);
 
-    char wordR[30];
-    char currChar;
-    int i = 0;
-    char message[BUFF_SIZE];
     FILE* playerState = fopen(path, "r");
 
-    if (fgetc(playerState) != ' ')
-    {
-        currChar = fgetc(playerState);
-        wordR[i] = currChar;
-        i++;
-    } 
-    if (strcmp(word,wordR) == 0){
-        sprintf(message, "RWG WIN %d\n", trialInt);
-    }
-    else {
-        sprintf(message, "RWG NOK %d\n", trialInt);
-    }
-    udpSend(udpSocket, message, verbose);
+    int aux[50];
+    char wordT[50];
+    bzero(wordT, 50);
+    char holder, temp;
 
+    int i=0, j=0, x=0, wordLen=0;
+    while((holder = fgetc(playerState)) != EOF) {
+        holder = toupper(holder);
+        if (holder == ' ') break;
+        wordT[i] = holder;
+        i++;
+        wordLen++;
+    }
+    fclose(playerState);
+
+    wordLen--;
+
+
+    playerState = fopen(path, "r");
+    // verificar erros
+
+    if (strcmp(word, wordT) != 0) {
+        
+        playerState = fopen(path, "r");
+        int currentErrors = 0;
+        // verificar erros
+ 
+        while((holder = fgetc(playerState)) != EOF) {
+            holder = toupper(holder);
+            if (holder == 'G') {
+                currentErrors++;
+            }
+        }
+
+        int errors;
+        wordLen++;
+        if (wordLen <= 6) { errors = 7; }
+        else if (wordLen > 6 && wordLen < 11) { errors = 8; }
+        else if (wordLen >= 11) { errors = 9; }
+
+        if (currentErrors >= errors) {
+            udpSend(udpSocket, "RWG OVR\n", verbose);
+
+            char newPath[50];
+            char newFileName[50];
+            sprintf(newPath, "Server/GAMES/%s", plid);
+            if (access(newPath, F_OK) != 0) {
+                mkdir(newPath, 0700);
+            }
+
+            time_t t = time(NULL);
+            struct tm tm = *localtime(&t);
+
+            sprintf(newPath, "Server/GAMES/%s/%d%d%d_%d%d%d_F.txt", plid, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+            playerState = fopen(path, "r");
+
+            rename(path, newPath);
+
+        
+            fclose(playerState);
+            return true;
+        }
+
+        // check errors
+        fclose(playerState);
+        udpSend(udpSocket, "RLG NOK\n", verbose);
+        playerState = fopen(path, "a");
+        fprintf(playerState, "%s",line);
+        fclose(playerState);
+        return true;
+    }
+
+    playerState = fopen(path, "a");
+    char message[BUFF_SIZE];
+
+    fprintf(playerState, "%s",line);
+    fclose(playerState);
+
+    if (strcmp(word, wordT) == 0) {
+        sprintf(message, "RWG WIN %s", trial);
+        udpSend(udpSocket, message, verbose);
+
+        char newPath[50];
+        char newFileName[50];
+        sprintf(newPath, "Server/GAMES/%s", plid);
+        if (access(newPath, F_OK) != 0) {
+            mkdir(newPath, 0700);
+        }
+
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+
+        sprintf(newPath, "Server/GAMES/%s/%d%d%d_%d%d%d_W.txt", plid, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+        
+        playerState = fopen(path, "r");
+
+        rename(path, newPath);
+
+    
+        fclose(playerState);
+        return true;
+    }
+    
+    udpSend(udpSocket, message, verbose);
+    
 }
 
 bool exitUDP(int udpSocket, char* plid, bool verbose) {
@@ -436,7 +541,7 @@ bool quitUDP(int udpSocket, char* plid, bool verbose) {
     if (strlen(plid) == 6) {
         while (*plid) {
             if (*plid < '0' || *plid > '9') { 
-                udpSend(udpSocket, "RLG ERR\n", verbose);
+                udpSend(udpSocket, "RQT ERR\n", verbose);
                 return true;    
             }
             ++plid;
@@ -444,7 +549,7 @@ bool quitUDP(int udpSocket, char* plid, bool verbose) {
         plid = plid - 6;
     }
     else {
-        udpSend(udpSocket, "RLG ERR\n", verbose);
+        udpSend(udpSocket, "RQT ERR\n", verbose);
         return true;
     }
 
@@ -456,7 +561,27 @@ bool quitUDP(int udpSocket, char* plid, bool verbose) {
         return true;
     }
 
-    int k = remove(path);
-    printf("%d\n", k);
+    char newPath[50];
+    char newFileName[50];
+    sprintf(newPath, "Server/GAMES/%s", plid);
+    if (access(newPath, F_OK) != 0) {
+        mkdir(newPath, 0700);
+    }
+
+    mkdir(newPath, 0700);
+
+    FILE* playerState = fopen(path, "r");
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+
+    sprintf(newPath, "Server/GAMES/%s/%d%d%d_%d%d%d_Q.txt", plid, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+    playerState = fopen(path, "r");
+
+    rename(path, newPath);
+
+
+    fclose(playerState);
+    udpSend(udpSocket, "RQT OK\n", verbose);
     return true;
 }

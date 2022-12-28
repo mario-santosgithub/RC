@@ -1,9 +1,16 @@
 #include "client.h"
-#include "../common.h"
 
+// Client TCP global variable
 int tcpSocket;
 
-
+/***
+ * @brief Function responsible for connecting the TCP
+ * 
+ * @param ip_address string with the ip
+ * @param port string with port 
+ * @param fd identifier
+ * @param res addrinfo struct
+*/
 int tcpConnect(char* ip_address, char* port, int* fd, struct addrinfo *res){
     int value;
     tcpSocket = create_socket(&res, SOCK_STREAM, ip_address, port);
@@ -14,7 +21,12 @@ int tcpConnect(char* ip_address, char* port, int* fd, struct addrinfo *res){
     return value;
 }
 
-
+/***
+ * @brief Function responsible for sending TCP messages
+ * 
+ * @param message string with the message to send
+ * @param size size of the messagee
+*/
 int tcpSend(char* message, int size){
     ssize_t nleft = size, nwritten;
     char *ptr = message;
@@ -31,7 +43,12 @@ int tcpSend(char* message, int size){
     return 1;
 }
 
-
+/***
+ * @brief Function responsible for reading TCP messages
+ * 
+ * @param buffer string with the message to send
+ * @param size size of the messagee
+*/
 int tcpRead(char* buffer, ssize_t size){
     ssize_t nleft = size, nread;
     char *ptr = buffer;
@@ -51,7 +68,14 @@ int tcpRead(char* buffer, ssize_t size){
 }
 
 
-
+/***
+ * @brief Function responsible for showing the scoreboard
+ * 
+ * @param ip_address string with the ip
+ * @param port string with port 
+ * @param plid string with the player ID
+ * @param res addrinfo struct
+*/
 void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) {
     
     char message[5], aux[2];
@@ -133,7 +157,14 @@ void scoreboard(char* ip_address, char* port, char* plid, struct addrinfo *res) 
     }
 }
 
-
+/***
+ * @brief Function responsible for showing the hint
+ * 
+ * @param ip_address string with the ip
+ * @param port string with port 
+ * @param plid string with the player ID
+ * @param res addrinfo struct
+*/
 void hint(char* ip_address, char* port, char* plid, struct addrinfo *res){
     
 
@@ -216,7 +247,14 @@ void hint(char* ip_address, char* port, char* plid, struct addrinfo *res){
     return;
 }
 
-
+/***
+ * @brief Function responsible for showing the state
+ * 
+ * @param ip_address string with the ip
+ * @param port string with port 
+ * @param plid string with the player ID
+ * @param res addrinfo struct
+*/
 void state(char* ip_address, char* port, char* plid, struct addrinfo *res) {
 
     char message[15];

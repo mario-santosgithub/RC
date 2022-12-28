@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "types.h": "c",
-        "server.h": "c",
-        "*.tcc": "c",
-        "fstream": "c",
-        "system_error": "c"
-    }
-}

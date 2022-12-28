@@ -1,12 +1,21 @@
 #include "client.h"
-#include "../common.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 
+// Client global variables
 int turn;
 char word[MAX_WORD_LEN];
 int k;
 
+/***
+ * @brief Checks the arguments of the input are correct
+ * 
+ * @param ip_address string with the ip
+ * @param port string with port 
+ * @param argc number of input arguments
+ * @param argv array with the input arguments
+ * return false otherwise
+*/
 bool checkArguments(char* ip_address, char* port, int argc, char** argv){
     if (port == NULL) { return false; }
     int size = strlen(port);
@@ -24,7 +33,13 @@ bool checkArguments(char* ip_address, char* port, int argc, char** argv){
     return true;
 }
 
-
+/***
+ * @brief Checks the flags of the input are correct
+ * 
+ * @param argc number of input arguments
+ * @param argv array with the input arguments
+ * return false otherwise
+*/
 bool checkFlags(int argc, char** argv) {
     if (strcmp(argv[1], "-n") == 0) {
         if (strcmp(argv[3], "-p") == 0) { return true; }
@@ -36,7 +51,15 @@ bool checkFlags(int argc, char** argv) {
     return false;
 }
 
-
+/***
+ * @brief Creates a socket to comunicate with the client
+ * 
+ * @param res addrinfo struct
+ * @param socktype the type of the socket, UDP or TCP
+ * @param ip_address string with the ip
+ * @param port string with port 
+ * return false otherwise
+*/
 int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* port){
     int sockfd = socket(AF_INET,socktype,0);
     if (sockfd == -1){
@@ -55,7 +78,18 @@ int create_socket(struct addrinfo **res, int socktype, char* ip_address, char* p
 }
 
 
-
+/***
+ * @brief Executes the commands from terminal
+ * 
+ * @param udp_socket identifies the socket
+ * @param res addrinfo struct
+ * @param ip_address string with the ip
+ * @param port string with port 
+ * @param command string with the command to execute
+ * @param plid string with the player ID
+ * @param groupID string with the group id
+ * return false otherwise
+*/
 void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* port, char* command, char* plid, char* groupID){
     char name[12]; // The largest command name has 11 characters + '\0'
     char arg1[SIZE];
@@ -77,6 +111,8 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         // Post (TCP): arg1 = text, arg2 = FName (optional)
         // There must be a logged in user and a group selected
         sscanf(command, "%s", plid);
+        turn = 0;
+        bzero(word, 50);
 
         if (strlen(plid) == 6) {
             while (*plid) {
@@ -101,6 +137,7 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
             return;
         }
         char letter[2]; 
+        bzero(letter, 2);
         sscanf(command, "%s", letter);
 
         if (strlen(letter) == 1) {
@@ -213,13 +250,20 @@ void commandExe(int udp_socket, struct addrinfo *res, char* ip_address, char* po
         puts("INVALID_CMD");
 }
 
+/***
+ * @brief Displays the game after a turn
+ * 
+ * @param buffer has the information a turn
+ * @param letter has the letter played
+ * return false otherwise
+*/
 
 void displayGame(char* buffer, char* letter) {
     // max buffer size is 128
     char val[BUFFER_SIZE], arg1[31];
     char output[BUFFER_SIZE];
     int n;
-    printf("buffer: %s\n", buffer);
+    
     sscanf(buffer, "%s %s", val, arg1);
     buffer += strlen(val) + strlen(arg1) + 2;
     
@@ -310,7 +354,7 @@ void displayGame(char* buffer, char* letter) {
 
     else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "OVR") == 0) {
 
-        sprintf(output, "That was not the correct word! You have no more chances to guess. Game over!");
+        sprintf(output, "That was not the correct letter! You have no more chances to play. Game over!");
     }
 
     else if (strcmp(val, "RLG") == 0 && strcmp(arg1, "INV") == 0) {
@@ -367,33 +411,55 @@ void displayGame(char* buffer, char* letter) {
 
 }
 
+/***
+ * @brief The main function of the program
+ * 
+ * @param argc number of the input arguments
+ * @param argv array with the input arguments
+ * return false otherwise
+*/
 int main(int argc, char** argv){
     char command[SIZE], plid[7], groupID[3], ip_address[512], port[6];
     char firstFlag[3], secondFlag[3];
     // colocar checks
 
-    if (argc != 5 || !checkFlags(argc, argv)) {
-        printf("Formatação errada, exemplo de utilização correta: './player -n lima -p 58000'\n");
-        return 0;
+    if (argc == 1) {
+        strcpy(port, GROUP_PORT);
+        strcpy(ip_address, "localhost");
     }
-
-    strcpy(firstFlag, argv[1]);
-
-    if (strcmp(firstFlag, "-n") == 0) {
-        strcpy(ip_address, argv[2]); 
-        strcpy(port, argv[4]);
+    else if (argc == 3) {
+        
+        if (strcmp(argv[1], "-n") == 0) {
+            strcpy(ip_address, argv[2]);
+            strcpy(port, GROUP_PORT);
+        }
+        else if (strcmp(argv[1], "-p") == 0) {
+            strcpy(port, argv[2]);
+            strcpy(ip_address, "localhost");
+        }
     }
     else {
-        strcpy(ip_address, argv[4]); 
-        strcpy(port, argv[2]);
-    } 
+        strcpy(firstFlag, argv[1]);
+        if (argc != 5 || !checkFlags(argc, argv)) {
+            printf("Formatação errada, exemplo de utilização correta: './player -n lima -p 58000'\n");
+            return 0;
+        }
 
-    /* fazer qualquer coisa para verificar os argumentos e dar msgs de erro */
-    if (!checkArguments(ip_address, port, argc, argv)) {
-        printf("Formatação errada, exemplo de utilização correta: './player -n lima -p 58000'\n");
-        return 0;
+        if (strcmp(firstFlag, "-n") == 0) {
+            strcpy(ip_address, argv[2]); 
+            strcpy(port, argv[4]);
+        }
+        if (strcmp(firstFlag, "-p") == 0){
+            strcpy(ip_address, argv[4]); 
+            strcpy(port, argv[2]);
+        } 
+
+        /* fazer qualquer coisa para verificar os argumentos e dar msgs de erro */
+        if (!checkArguments(ip_address, port, argc, argv)) {
+            printf("Formatação errada, exemplo de utilização correta: './player -n lima -p 58000'\n");
+            return 0;
+        }
     }
-
 
     struct addrinfo *res;
     int udp_socket = create_socket(&res, SOCK_DGRAM, ip_address, port);

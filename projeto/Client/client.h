@@ -15,7 +15,7 @@
 #include <stdbool.h>
 
 
-
+#define GROUP_PORT "58063"
 #define BUF_SIZE 128
 #define MAX_WORD_LEN 50
 #define SIZE 512

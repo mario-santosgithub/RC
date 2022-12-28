@@ -18,6 +18,7 @@
 
 #define BUFF_SIZE 128
 #define SIZE 512
+#define GROUP_PORT "58063"
 
 /* UDP functions*/
 bool start(int udpSocket, char* plid, char* fileName, bool verbose);

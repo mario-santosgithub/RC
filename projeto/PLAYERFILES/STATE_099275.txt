@@ -1,0 +1,4 @@
+     Active game found for player 099275
+     --- Transactions found: 1 ---
+     Letter trial: a - TRUE
+     Solved so far: --a--a------

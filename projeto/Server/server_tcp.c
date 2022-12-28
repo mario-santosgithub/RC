@@ -1,5 +1,4 @@
 #include "server.h"
-#include "../common.h"
 
 int tcpRead(int fd, char* message, ssize_t size) {
     ssize_t nleft = size, n;
@@ -102,8 +101,12 @@ bool hint(int fd, bool verbose) {
     
 
     char data[fileSize];
-    
-    fread(data, fileSize, 1, image);
+    bzero(data, fileSize);
+    fread(data, 16, 16, image);
+    while(tcpSend(fd, data ,16) == 1) {
+         fread(data, 16, 16, image);
+    }
+
     printf("data: %s", data);
     fclose(image);
 
@@ -111,8 +114,6 @@ bool hint(int fd, bool verbose) {
     sprintf(message, "RHL OK %s %ld %s\n", "banana.jpg", fileSize, data);
     printf("buffer: %s\n", message);
 
-    if(tcpSend(fd, message, strlen(message)) == -1) {
-        return true;
-    }
+    
     return true;
 }

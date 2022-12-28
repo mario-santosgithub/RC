@@ -1,11 +1,8 @@
 #include "server.h"
-#include "../common.h"
 
 
 struct sockaddr_in clientAddr;
 __socklen_t addrlen;
-
-
 
 bool checkPort(char* port) {
     while (*port) {
@@ -23,7 +20,12 @@ bool executeUDP(int udpSocket, char* message, char* fileName, bool verbose) {
     bzero(arg2, SIZE);
     bzero(arg3, SIZE);
     sscanf(message, "%[^ \n]", opCode);
-    
+    if (verbose) {
+        char client[128];
+        getnameinfo((struct sockaddr *)&clientAddr, addrlen, client, sizeof(client), NULL, 0, 0);
+        printf("UDP\nIP: %s\nPORT: %d\n", inet_ntoa(clientAddr.sin_addr), clientAddr.sin_port);
+        printf("Message Received: %s\n", message);
+    }
     message += strlen(opCode);
     if (!strcmp(opCode, "SNG")){
 
@@ -52,6 +54,12 @@ bool executeUDP(int udpSocket, char* message, char* fileName, bool verbose) {
 
 bool executeTCP(int fd, char *message, bool verbose) {
 
+    if (verbose) {
+        char client[128];
+        getnameinfo((struct sockaddr *)&clientAddr, addrlen, client, sizeof(client), NULL, 0, 0);
+        printf("TCP\nIP: %s\nPORT: %d\n", inet_ntoa(clientAddr.sin_addr), clientAddr.sin_port);
+    }
+
     if (!strcmp(message, "GHL ")) {
         return hint(fd, verbose);
     }
@@ -60,7 +68,7 @@ bool executeTCP(int fd, char *message, bool verbose) {
 
 int udpSend(int udpSocket, char* message, bool verbose) {
 
-    if (verbose) { printf("Message Sent: %s", message); }
+    if (verbose) { printf("Message Sent: %s\n", message); }
 
     addrlen = sizeof(clientAddr);
     ssize_t n = sendto(udpSocket, message, strlen(message), 0, (struct sockaddr*)&clientAddr, addrlen);
@@ -221,17 +229,15 @@ int main(int argc, char** argv) {
 
         // UDP
         if (FD_ISSET(udpSocket, &rset)) {
-            printf("udp here\n");
             bzero(message, sizeof(message));
             udpReceive(udpSocket, message);
-            printf("message: %s\n", message);
 
             if (!executeUDP(udpSocket, message, wordFile,verbose)) {
                 udpSend(udpSocket, "ERR\n", verbose);
             }
-            else {
-                printf("executeUDP true\n");
-            }
+        }
+        if (verbose) {
+            puts("--------------------------");
         }
 
     }
